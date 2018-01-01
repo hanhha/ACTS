@@ -2,4 +2,18 @@
 
 import bittrex as exchg
 
-pAPI = exchg.PublicAPI  (exchg.API_VER_1_1)
+pAPIv1 = exchg.PublicAPI  (exchg.API_V1_1)
+pAPIv2 = exchg.PublicAPI  (exchg.API_V2_0)
+
+def moni (inpQ, outQ, params, Stop):
+    market = params [0]
+    interval = params [1]
+    while not Stop.is_set():
+        if not inpQ.empty():
+            tmp = inpQ.get (block = False)
+            res, ticks = pAPIv2.get_ticks (market, interval)
+            for q in outQ:
+                q.put ((res, ticks), block = True)
+            if res is False:
+                print ('Can not get data from exchange\'s server')
+            inpQ.task_done ()
