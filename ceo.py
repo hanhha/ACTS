@@ -3,6 +3,7 @@
 from queue import Queue 
 from threading import Thread, Event
 import copy
+import signal
 
 def norm (param):
     if type(param) is str:
@@ -48,10 +49,14 @@ class CEO ():
         for t in self.execThreads:
             t.start ()
 
-    def stop (self):
+    def stop (self, signo, _frame):
+        print ("Interrupted by %d, shuting down" % signo)
         self.allStop.set ()
 
-    def wait_idle (self):
+    def idle (self):
+        for sig in ('INT', 'TERM', 'HUP'):
+            signal.signal (getattr(signal, 'SIG' + sig), self.stop)
+
         for t in self.execThreads:
             t.join ()
         print ('All workers stopped.')

@@ -4,15 +4,20 @@ import ceo, event_agent, response_agent, monitor_agent, speaker_agent, analysis_
 import testscript
 
 exec_func = {'egen': event_agent.egen,
+             'eand': event_agent.eand,
+             'eor' : event_agent.eand,
+             'enot': event_agent.eand,
+
              'moni': monitor_agent.moni,
-             'notf': speaker_agent.notf}
+
+             'notf': speaker_agent.notf,
+             'cfrm': speaker_agent.cfrm,
+
+             'sell': response_agent.sell,
+             'buy' : response_agent.buy}
+
 sj = ceo.CEO (testscript.script, exec_func)
 sj.run ()
-try:
-    while True:
-        pass
-except KeyboardInterrupt:
-    print ("User interrupted")
-sj.stop ()
-sj.wait_idle ()
+
+sj.idle ()
 

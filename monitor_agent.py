@@ -11,9 +11,12 @@ def moni (inpQ, outQ, params, Stop):
     while not Stop.is_set():
         if not inpQ.empty():
             tmp = inpQ.get (block = False)
-            res, ticks = pAPIv2.get_ticks (market, interval)
+            res, tick = pAPIv2.get_ticks (market, interval, True)
             for q in outQ:
-                q.put ((res, ticks), block = True)
+                if type(tick) is list:
+                    q.put ((res, tick[0]), block = True)
+                else:
+                    q.put ((res, tick), block = True)
             if res is False:
                 print ('Can not get data from exchange\'s server')
             inpQ.task_done ()

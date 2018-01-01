@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 def notf (inpQ, outQ, params, Stop):
-    if params[0].strip().lower() == 'rem':
+    if params[0] == 'rem':
         fix_str = True
         info_str = params[1]
     else:
@@ -17,10 +17,11 @@ def notf (inpQ, outQ, params, Stop):
                 if type(info) is tuple:
                     if info[0] is True:
                         #TODO: notf
-                        print (info[1][param[0]])
+                        print (info[1][params[0].upper()])
                     else:
                         #TODO: notf
                         print ("Could not get data")
+                        print (info[1])
                 else:
                     if info is True:
                         #TODO: notf
