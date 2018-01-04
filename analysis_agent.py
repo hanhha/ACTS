@@ -24,15 +24,15 @@ def price_compare (price, cmp_cond, pivot):
 	if _pivot == None:
 		print ('Invalid parameter {p}'.format (p = pivot))
 	else:
-		if cmp_cond == 'gtoe':
+		if cmp_cond == 'ge':
 			return price >= _pivot
-		elif cmp_cond == 'gt':
+		elif cmp_cond == 'g':
 			return price > _pivot
 		elif cmp_cond == 'e':
 			return price == _pivot
-		elif cmp_cond == 'lt':
+		elif cmp_cond == 'l':
 			return price < _pivot
-		elif cmp_cond == 'ltoe':
+		elif cmp_cond == 'le':
 			return price <= _pivot
 		else:
 			print ('Invalid comparison {c}'.format(c = cmp_cond))
