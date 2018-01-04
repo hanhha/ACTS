@@ -2,17 +2,16 @@
 
 #TODO: analysis_agent
 
-def pcmp (inpQ, outQ, params, Stop):
-    while not Stop.is_set():
-        if not inpQ.empty():
-            #TODO: moni
-            tmp = inpQ.get (block = False)
-            for q in outQ:
-                q.put (market, block = True)
-            print ('moni takes place')
-            inpQ.task_done ()
-
-
+def get_base_volumes (all_24hsum):
+	base_volumes = dict()
+	for mar in all_24hsum:
+		base = mar ['MarketName'].split ('-')[0]
+		if base in base_volumes.keys():
+			base_volumes [base] += mar ['BaseVolume']
+		else:
+			base_volumes [base] = mar ['BaseVolume']
+	return base_volumes
+		
 
 
 
