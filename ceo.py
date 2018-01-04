@@ -6,11 +6,7 @@ import copy
 import signal
 import sys
 
-def norm (param):
-	if type(param) is str:
-		return param.strip().lower()
-	else:
-		return param
+import misc_utils as misc
 
 confInst = {'tick':'tick', 'fltr':'filter'}
 trigInst = {'pcmp':'price compare', 'ptrnd': 'price trend'}
@@ -77,7 +73,7 @@ class CEO ():
 		retProcesses = list()
 
 		for inst in command_list:
-			opc = InstOpc[norm(inst [0])]
+			opc = InstOpc[misc.norm(inst [0])]
 
 			if opc in trigInst.keys():
 				outEvt = inst [-1]

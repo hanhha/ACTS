@@ -2,6 +2,7 @@
 
 import time 
 from functools import reduce
+import misc_utils as misc
 
 def eand (inpQ, outQ, params, Stop):
 	assert (type(inpQ) is list)
@@ -11,8 +12,7 @@ def eand (inpQ, outQ, params, Stop):
 			if not iq.empty():
 				nq += 1
 		if nq == len(inpQ):
-			for q in outQ:
-				q.put (True, block = True)
+			misc.fill_outQ (outQ, True)
 			for iq in inpQ:
 				tmp = inpQ.get (block = False)
 				inpQ.task_done ()
@@ -25,8 +25,7 @@ def eor (inpQ, outQ, params, Stop):
 			if not iq.empty():
 				nq += 1
 		if nq > 0:
-			for q in outQ:
-				q.put (True, block = True)
+			misc.fill_outQ (outQ, True)
 			for iq in inpQ:
 				tmp = inpQ.get (block = False)
 				inpQ.task_done ()
