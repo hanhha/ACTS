@@ -1,28 +1,29 @@
 script = [
 	# Monitor every 60s
 	['tick', 60],
-	# Low pass filter in 2 ticks
-	['filter', 2],
 	['generate', 1, 'clk'],
 	
 	# Monitor one minitue candle tick of BTC-ADA market
 	# Supported: oneMin, fiveMin, thirtyMin, hour, day
 	['monitor',    'clk',          'BTC-ADA',          'oneMin',   'btc_ada_tick'],
 
+	# Calculate all needed information
+	['calc',          'btc_ada_tick', 'ema', 2, 'sma', 5, 'cprice',   'btc_ada_analysis']
+	
 	# Compare closed price increasing 10% from my last order price 
-	['compare',    'btc_ada_tick', 'cprice', 'ge',     '10%',      '10p_en'],
-	# Check if closed price has just been down from maxima 
-	['turnover',   'btc_ada_tick', 'maxima', 'cprice',             'peak_en'],
-	# Check if closed price is above EMA with period 5
-	['compare',    'btc_ada_tick', 'cprice', 'ge',     'ema', '5', 'above_ema_en'],
+	['compare',    'btc_ada_analysis', 'cprice', 'ge',     '10%',      '10p_en'],
+	# Check if EMA2 has just been down from maxima 
+	['turnover',   'btc_ada_tick', 'ema', 2, 'maxima',                      'peak_en'],
+	# Check if closed price is above SMA with period 5
+	['compare',    'btc_ada_tick', 'cprice', 'ge',     'sma', '5', 'above_sma5_en'],
 
 	# Enable to sell all ADA with last price when all above conditions are met
-	['and',        '10p_en',             'peak_en', 'above_ema_en',                              'sell_ada_en']
+	['and',        '10p_en',             'peak_en', 'above_sma5_en',                              'sell_ada_en']
 	['confirm',    'sell_ada_en',        'Turnover, higher price, above EMA met, sell all ADA?', 'sell_ada_confirmed'],
 	['sell',       'sell_ada_confirmed', 'BTC-ADA', 'price', 'all',                              'sell_success'],
 	['notify',     'sell_ada_success',   'uuid',                                                  None],
 
-	# Check if trend of closed price is fallsing 
+	# Check if trend of closed price is falling 
 	['trend',      'btc_ada_tick', 'cprice',  'fall',             'down_en'],
 	# Check if closed price has just been up from minimum 
 	['turnover',   'btc_ada_tick', 'minimum', 'cprice',           'canyon_en'],
