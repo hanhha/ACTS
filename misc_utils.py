@@ -36,3 +36,24 @@ class Archive ():
 		if len (self._data) > self._length:
 			del self._data [0]
 		
+
+class BPA (object): # Base Processing Agent
+	def __init__ (self, data = None, params = {}):
+		self._data = data
+		if self._data is not None:
+			self._data.BindTo (self.callback)
+		self._params = params.copy ()
+		self._observer = list ()
+
+	def CallBack (self, data):
+		assert 'Not implemented yet', 0
+
+	def BroadCast (self, data):
+		for cb in self._observer:
+			cb (data)
+
+	def BindTo (self, cb):
+		self._observer.append (cb)
+
+
+
