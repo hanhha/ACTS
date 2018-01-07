@@ -38,15 +38,24 @@ class Archive ():
 		
 
 class BPA (object): # Base Processing Agent
-	def __init__ (self, data = None, params = {}):
-		self._data = data
-		if self._data is not None:
-			self._data.BindTo (self.callback)
-		self._params = params.copy ()
+	def __init__ (self, source = None, params = {}):
+		self._source = None 
+		self._params = {}
+		if source is not None:
+			self.Bind (source)
+		if len(params) > 0:
+			self.setParams (params)
 		self._observer = list ()
 
+	def Bind (self, source):
+		self._source = source
+		self._source.BindTo (self.CallBack)
+
+	def setParams (self, params):
+		self._params = params.copy ()
+
 	def CallBack (self, data):
-		assert 'Not implemented yet', 0
+		print (data)
 
 	def BroadCast (self, data):
 		for cb in self._observer:

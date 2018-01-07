@@ -40,7 +40,7 @@ def buy (inpQ, outQ, params, Stop):
 			buy_en = True if (type(tmp) is tuple and tmp[0] is True) or (tmp is True) else False
 			price, qty = exch.process_order_params (market, price, qty, for_sell = False)
 	
-			if sell_in and (price is not None) and (qty is not None):
+			if buy_en and (price is not None) and (qty is not None):
 				order_res, msg = exch.buy_limit (market, qty, price)
 				result = (True, msg['uuid']) if order_res else (False, msg)
 				misc.fill_outQ (outQ, result)

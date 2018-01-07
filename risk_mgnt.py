@@ -2,16 +2,32 @@
 import misc_utils as misc
 
 class RiskMgnt (misc.BPA):
-	def __init__ (self, data, params):
-		misc.BPA.__init__ (self, data, params)
-		self._netbuy = self._params ['buy'] * (1 + self._params ['fee'])
-		self._accepted_loss = sefl._params ['accepted_loss']
-		self.in_risk = False
+	def __init__ (self, source, params):
+		misc.BPA.__init__ (self, source = source, params = params)
+		if len(params) > 0:
+			self.setParams (params)
+		self._netbuy        = 0
+		self._bqty          = 0
+		self._enable        = False
 
-	def check_risk (self, price):
-		return price <= self._netbuy * (1 - self._accepted_loss)
+	def setParams (self, params):
+		misc.BPA.setParams (self, params)
+		self._spmul         = (1 - self._params ['fee'])
+		self._accepted_loss = self._params ['loss']
+
+	def check_risk (self, ppu):
+		return self._enable and (ppu * self._bqty <= self._netbuy * (1 - self._accepted_loss))
+
+	def set_bought_price (self, price, commission, qty):
+		self._bqty   = qty
+		self._gprice = price + commission	
+		self._enable = True
+
+	def done (self):
+		self._enable = False
 
 	def CallBack (self, data):
-		in_risk = self.check_risk (data['Last'])
-		self.BroadCast (in_risk) 
-		
+		if data[0] == 'buy':
+			self.set_bought_price (data[2]['price'], data[2]['fee'], data[2]['qty'])
+		elif data[0] == 'sell':
+			self.done ()

@@ -26,6 +26,9 @@ def sell_limit (market, qty, price):
 def get_ticker (market):
 	return pAPIv1.get_ticker (market)
 
+def get_order_status (uuid):
+	return aAPIv1.get_order (uuid)
+
 def process_candle (candle, params):
 	""" Supported features:
 	DP: delta price < 0 means RED candle, >=0 mean GREEN candle
