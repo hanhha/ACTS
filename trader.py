@@ -25,13 +25,13 @@ class Trader (misc.BPA):
 		self.strategy.seeker.Bind (self.performer)
 
 	def start (self):
-		if not cfg.debug_cfg ['trial']:
+		if not self._params ['trial']:
 			self.monitor.start ()
 		else:
 			self.monitor.start_sim ()
 
 	def idle (self):
-		if not cfg.debug_cfg ['trial']:
+		if not self._params ['trial']:
 			try:
 				while True:
 					sleep (1)
@@ -42,8 +42,26 @@ class Trader (misc.BPA):
 
 if __name__ == "__main__":
 	trader = Trader (source = None, params = cfg.configuration, agent_params = cfg.strategy_agents) 
+	if cfg.configuration ['trial']:
+		print ('\n' + 'Running simulation for {mar} market with {n} latest candle ticks ...'.format (mar = cfg.configuration ['market'], n = cfg.configuration ['trial']))  
+	else:
+		print ('\n' + 'Running auto trader for {mar} market ...'.format (mar = cfg.configuration ['market']))
+
 	trader.start ()
 	trader.idle  ()
 	
-	profit = sum([x[-1]['diff'] for x in trader.profit_eva.archieve])
-	print ('Profit: {p}'.format(p=profit))
+	print ('\n' + 'Finish.')
+
+	profit_data = trader.profit_eva.archieve
+	profit     = sum([x[-1]['diff'] for x in profit_data])
+	losses     = sum([1 if x[-1]['diff'] <  0 else 0 for x in profit_data])
+	gains      = sum([1 if x[-1]['diff'] >  0 else 0 for x in profit_data])
+	unchanges  = sum([1 if x[-1]['diff'] == 0 else 0 for x in profit_data])
+	print ('\n' + 'Reports')
+	print ('----------------------------------------------------')
+	print ('Num of investment cycles     | {0:<20}'.format (len(profit_data)))
+	print ('Gains                        | {0:<20}'.format(gains))
+	print ('Losses                       | {0:<20}'.format(losses))
+	print ('Unchanges                    | {0:<20}'.format(unchanges))
+	print ('----------------------------------------------------')
+	print ('Profit                       | {0:<20}'.format(profit))
