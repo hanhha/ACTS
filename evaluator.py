@@ -25,6 +25,8 @@ class ProfitEvaluator (Evaluator):
 			d = gross_return - self._gross_invest
 			profit = {'diff': d, 'percent': d / self._gross_invest}
 			self.archieve[-1].extend ([data[1]['uuid'], profit])
+			print (data)
+			print (d)
 		else:
 			print ('Unknown data for profit evaluation.')
 

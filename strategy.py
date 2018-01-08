@@ -17,24 +17,30 @@ class Strategy (misc.BPA):
 
 	def CallBack (self, data):
 		new_data = data.copy ()
-
+		turn = False
+		
 		if self.is_idle:
 			predict, profitable = self.seek_oppoturnity (data)
-			act = ['buy', int(time())] if profitable else [None]
+			act = ['buy', data ['T']] if profitable else [None]
 			new_data ['act']        = act
 			new_data ['predict']    = predict
+			turn = act [0] == 'buy'
+
 		else:
 			risk, goal_achieved, predict, harvestable = self.check_harvestable (data)
 			if risk:
+				print ('Risk {r}'.format(r=risk))
 				act = ['sell'] if predict == 'falling' or predict == 'peak' else [None]
 			else:
 				act = ['sell'] if harvestable else [None]
+			turn = act [0] == 'sell'
+				
 			new_data ['act'] = act
 			new_data ['predict'] = predict 	 
 
 		self.BroadCast (new_data)
 
-		self.is_idle = not self.is_idle
+		self.is_idle = not self.is_idle if turn else self.is_idle
 				
 	def seek_oppoturnity (self, data):
 		predict_trend      = self.seeker.predict ('trend', data)

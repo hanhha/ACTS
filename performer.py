@@ -15,8 +15,8 @@ class Performer (misc.BPA):
 		_price = misc.norm(price)
 		_qty   = misc.norm(qty)
 
-		if _price == 'last':
-			_price = data ['Last']
+		if type(_price) is str:
+			_price = data [_price]
 		
 		if _qty == 'all':
 			if for_sell:
@@ -63,14 +63,18 @@ class Performer (misc.BPA):
 		tag    = params ['tag']
 		mar    = self._params ['market']
 		if self._params['trial']:
-			p,q = self.process_order_params ({'Last':params['last']}, price, qty, False)		
-			ic = self._capital if self._capital is not None else self._params['initial_capital']
-			self._capital = ic - p*q * (1+self._params['fee']) 
-			self._avail_qty = self._avail_qty + q
-			self.BroadCast (('buy', 0, {'price': q*p,
-						    'qty'  : q,
-						    'fee'  : p*q*self._params['fee'],
-						    'uuid' : '12345'}))	
+			p, q = self.process_order_params ({self._params['price']:params[self._params['price']]}, price, qty, False)
+			if q > 0:
+				ic = self._capital if self._capital is not None else self._params['initial_capital']
+				self._capital = ic - p*q * (1+self._params['fee']) 
+				self._avail_qty = self._avail_qty + q
+				self.BroadCast (('buy', 0, {'price': q*p,
+								'qty'  : q,
+								'fee'  : p*q*self._params['fee'],
+								'uuid' : '12345'}))	
+			else:
+				print ('Not enough base currency')
+				
 		else:
 			status = self.buy (mar, price, qty)
 			if status[0]:
@@ -84,7 +88,7 @@ class Performer (misc.BPA):
 		price  = params ['price']
 		mar    = self._params ['market']
 		if self._params['trial']:
-			p,q = self.process_order_params ({'Last':params['last']}, price, qty, True)		
+			p,q = self.process_order_params ({self._params['price']:params[self._params['price']]}, price, qty, True)		
 			ic = self._capital if self._capital is not None else self._params['initial_capital']
 			self._capital = ic + p*q * (1-self._params['fee']) 
 			self._avail_qty = self._avail_qty - q

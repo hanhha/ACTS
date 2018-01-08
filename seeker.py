@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
-import talib
 import misc_utils as misc
 import exchange as exch
+from pandas import DataFrame
 
-class Seeker (misc.BPA):
+class BaseSeeker (misc.BPA):
 	def __init__ (self, source, params):
 		misc.BPA.__init__ (self, source = source, params = params)
-		self.archieve = list ()	
+		self.archieve = list ()
+		self.pdarchieve = DataFrame ()
+		self.archieve_len = 0
 		if len(params) > 0:
 			self.setParams (params)
 		self._investment = 0
@@ -20,15 +22,17 @@ class Seeker (misc.BPA):
 		self._fee  = self._params ['fee']
 
 	def check_goal_achieved (self, price):
-		gprice = price * (1 - self._fee)
-		return (gprice * self._qty_bought) > (self._investment*(1 + self._goal))  
+		# TODO
+		return True
 
 	def store (self, data):
 		self.archieve.append (data)
+		self.pdarchieve = self.pdarchieve.append (data, ignore_index = True)
+		self.archieve_len += 1
 		self.prediction = dict ()
 	
 	def predict (self, factor, data):
-		if len(self.archieve) > 0 and data ['T'] != self.archieve [-1]['T']:
+		if (self.archieve_len > 0 and data ['T'] != self.archieve [-1]['T']) or (self.archieve_len == 0):
 			self.store (data)
 		
 		return self.call_predict (factor, data) if factor not in self.prediction.keys() else self.prediction [factor]

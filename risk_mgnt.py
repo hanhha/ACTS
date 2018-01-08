@@ -6,7 +6,7 @@ class RiskMgnt (misc.BPA):
 		misc.BPA.__init__ (self, source = source, params = params)
 		if len(params) > 0:
 			self.setParams (params)
-		self._netbuy        = 0
+		self._gprice        = 0
 		self._bqty          = 0
 		self._enable        = False
 
@@ -16,9 +16,10 @@ class RiskMgnt (misc.BPA):
 		self._accepted_loss = self._params ['loss']
 
 	def check_risk (self, ppu):
-		return self._enable and (ppu * self._bqty <= self._netbuy * (1 - self._accepted_loss))
+		return self._enable and ((ppu * self._bqty) <= (self._gprice * (1 - self._accepted_loss)))
 
 	def set_bought_price (self, price, commission, qty):
+		print ('Keep track {p} - {q}'.format (p = price, q = qty))
 		self._bqty   = qty
 		self._gprice = price + commission	
 		self._enable = True

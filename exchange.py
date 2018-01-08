@@ -57,8 +57,8 @@ def process_order_params (market, price, qty, for_sell = True):
 
 	price_avail, ticker = exch.get_ticker (market)
 
-	if _price == 'last':
-		_price = ticker ['Last'] if price_avail else None
+	if type(_price) is str:
+		_price = ticker [_price] if price_avail else None
 	
 	if for_sell:
 		balance_avail, balance = get_balance (market.split('-')[1])

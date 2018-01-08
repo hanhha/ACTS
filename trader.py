@@ -43,7 +43,7 @@ class Trader (misc.BPA):
 if __name__ == "__main__":
 	trader = Trader (source = None, params = cfg.configuration, agent_params = cfg.strategy_agents) 
 	if cfg.configuration ['trial']:
-		print ('\n' + 'Running simulation for {mar} market with {n} latest candle ticks ...'.format (mar = cfg.configuration ['market'], n = cfg.configuration ['trial']))  
+		print ('\n' + 'Running simulation for {mar} market with {n} latest candle ticks ...'.format (mar = cfg.configuration ['market'], n = cfg.configuration ['sim_period']))  
 	else:
 		print ('\n' + 'Running auto trader for {mar} market ...'.format (mar = cfg.configuration ['market']))
 
@@ -53,10 +53,20 @@ if __name__ == "__main__":
 	print ('\n' + 'Finish.')
 
 	profit_data = trader.profit_eva.archieve
-	profit     = sum([x[-1]['diff'] for x in profit_data])
-	losses     = sum([1 if x[-1]['diff'] <  0 else 0 for x in profit_data])
-	gains      = sum([1 if x[-1]['diff'] >  0 else 0 for x in profit_data])
-	unchanges  = sum([1 if x[-1]['diff'] == 0 else 0 for x in profit_data])
+	if len(profit_data) > 0:
+		if len(profit_data [-1]) < 4:
+			del profit_data [-1]
+	
+	if len(profit_data) > 0:
+		profit     = sum([x[-1]['diff'] for x in profit_data])
+		losses     = sum([1 if x[-1]['diff'] <  0 else 0 for x in profit_data])
+		gains      = sum([1 if x[-1]['diff'] >  0 else 0 for x in profit_data])
+		unchanges  = sum([1 if x[-1]['diff'] == 0 else 0 for x in profit_data])
+	else:
+		profit     = 0
+		losses     = 0
+		gains      = 0
+		unchanges  = 0
 	print ('\n' + 'Reports')
 	print ('----------------------------------------------------')
 	print ('Num of investment cycles     | {0:<20}'.format (len(profit_data)))
