@@ -15,16 +15,17 @@ class Evaluator (misc.BPA):
 
 class ProfitEvaluator (Evaluator):
 	def record (self, data):
-		# request data [type, timestamp if buy, order_info]
+		print (data)
+		# request data [type, timestamp, order_info]
 		# store [timestamp, buy_order_uuid, sell_order_uuid, profit]
 		if data[0] == 'buy':
 			self.archieve.append ([data[1], data[2]['uuid']])
 			self._gross_invest = data[2]['price'] + data[2]['fee']
 		elif data[0] == 'sell':
-			gross_return = data[1]['price'] - data[1]['fee']
+			gross_return = data[2]['price'] - data[2]['fee']
 			d = gross_return - self._gross_invest
 			profit = {'diff': d, 'percent': d / self._gross_invest}
-			self.archieve[-1].extend ([data[1]['uuid'], profit])
+			self.archieve[-1].extend ([data[2]['uuid'], profit])
 			print (data)
 			print (d)
 		else:

@@ -68,7 +68,7 @@ class Performer (misc.BPA):
 				ic = self._capital if self._capital is not None else self._params['initial_capital']
 				self._capital = ic - p*q * (1+self._params['fee']) 
 				self._avail_qty = self._avail_qty + q
-				self.BroadCast (('buy', 0, {'price': q*p,
+				self.BroadCast (('buy', tag, {'price': q*p,
 								'qty'  : q,
 								'fee'  : p*q*self._params['fee'],
 								'uuid' : '12345'}))	
@@ -86,13 +86,14 @@ class Performer (misc.BPA):
 	def harvest (self, params):
 		qty    = params ['amount']
 		price  = params ['price']
+		tag    = params ['tag']
 		mar    = self._params ['market']
 		if self._params['trial']:
 			p,q = self.process_order_params ({self._params['price']:params[self._params['price']]}, price, qty, True)		
 			ic = self._capital if self._capital is not None else self._params['initial_capital']
 			self._capital = ic + p*q * (1-self._params['fee']) 
 			self._avail_qty = self._avail_qty - q
-			self.BroadCast (('sell', {'price': q*p,
+			self.BroadCast (('sell', tag, {'price': q*p,
 						  'qty'  : q,
 						  'fee'  : p*q*self._params['fee'],
 						  'uuid' : '12345'}))	
@@ -100,7 +101,7 @@ class Performer (misc.BPA):
 			status = self.sell (mar, price, qty)
 			if status[0]:
 				order_info = wait (status[1])
-				self.BroadCast (('sell', order_info)) 			
+				self.BroadCast (('sell', tag, order_info)) 			
 			else:
 				print ('Sell order was not placed succesfully.')
 
@@ -113,4 +114,5 @@ class Performer (misc.BPA):
 		elif data['act'] [0] == 'sell':
 			self.harvest ({'amount': self._params ['sell'],
 				      'last'   : data ['Last'],
-				      'price'  : 'last'})	
+                      'tag'    : data ['act'][1],
+			          'price'  : 'last'})	

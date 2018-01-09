@@ -30,9 +30,9 @@ class Strategy (misc.BPA):
 			risk, goal_achieved, predict, harvestable = self.check_harvestable (data)
 			if risk:
 				print ('Risk {r}'.format(r=risk))
-				act = ['sell'] if predict == 'falling' or predict == 'peak' else [None]
+				act = ['sell', data ['T']] if predict == 'falling' or predict == 'peak' else [None]
 			else:
-				act = ['sell'] if harvestable else [None]
+				act = ['sell', data ['T']] if harvestable else [None]
 			turn = act [0] == 'sell'
 				
 			new_data ['act'] = act
