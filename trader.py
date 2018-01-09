@@ -52,6 +52,7 @@ if __name__ == "__main__":
 	
 	print ('\n' + 'Finish.')
 
+	trader.predict_eva.print_all (0)
 	profit_data = trader.profit_eva.archieve
 	if len(profit_data) > 0:
 		if len(profit_data [-1]) < 4:
@@ -62,6 +63,7 @@ if __name__ == "__main__":
 		losses     = sum([1 if x[-1]['diff'] <  0 else 0 for x in profit_data])
 		gains      = sum([1 if x[-1]['diff'] >  0 else 0 for x in profit_data])
 		unchanges  = sum([1 if x[-1]['diff'] == 0 else 0 for x in profit_data])
+		trader.profit_eva.print_all ()
 	else:
 		profit     = 0
 		losses     = 0

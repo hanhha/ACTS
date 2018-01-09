@@ -61,7 +61,6 @@ class Seeker (seeker.BaseSeeker):
 			print ('Predict trend {t} - previous predicted trend {pt}'.format(t = self.predict('trend',data), pt = self.pre_ptrend))
 			print ('SD {0:20}'.format(sd))
 			print ('Price at goal = ' + str((1 + self._goal) * data['Last']))
-			print (data)
 			
 		return profitable
 
