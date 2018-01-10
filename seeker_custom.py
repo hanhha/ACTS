@@ -53,10 +53,10 @@ class Seeker (seeker.BaseSeeker):
 		# Desired point:  canyon
 		sd = ta.sSD (self.pdarchieve, 6, 'C', MA_Type.SMA)[self.archieve_len-1]
 		
-		#goal_check =  sd > (self._goal * data['Last'])
-		goal_check = True
-		profitable = ((self.predict('trend',data) == 'canyon') or (self.predict('trend',data) == 'rising' and self.pre_ptrend == 'falling')) and goal_check
-		
+		#goal_archieved =  sd > (self._goal * data['Last'])
+		goal_archieved  = True
+		pvt = ta.PVT (self.archieve, 'C')
+		bearish_signal  = ((self.predict('trend',data) == 'canyon') or (self.predict('trend',data) == 'rising' and self.pre_ptrend == 'falling')) and 
 		if profitable:
 			print ('Predict trend {t} - previous predicted trend {pt}'.format(t = self.predict('trend',data), pt = self.pre_ptrend))
 			print ('SD {0:20}'.format(sd))
@@ -66,4 +66,6 @@ class Seeker (seeker.BaseSeeker):
 
 	def predict_harvestable (self, data):
 		# sell at goal
-		return self.check_goal_achieved (data['Last'])
+		# rising trending is finished
+		trend_done = self.predict('trend',data) == 'peak' or self.predict('trend',data) == 'falling'
+		return self.check_goal_achieved (data['Last']) and trend_done

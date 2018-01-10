@@ -3,6 +3,9 @@
 from talib import abstract
 import pandas as pd
 
+def pandas_convert (dictdata):
+	return pd.DataFrame (dictdata)
+
 def scale_up (data, interest):
 	sample = data[interest] .max()
 	if sample < 0.000001:
@@ -23,6 +26,21 @@ def scale_up (data, interest):
 	_data[interest] = data[interest] * mul
 	return _data, mul
 	
+def PVT (datalist, price, pre_pvt = 0):
+	pvt = list ()
+	for idx, data in enumerate(datalist):
+		if idx > 0:
+			_pre_price = data_list[idx - 1][price]
+			_pre_pvt   = pvt [idx - 1]
+		else:
+			_pre_price = data ['O']
+			_pre_pvt    = pre_pvt
+		price_change = (data[price] - _pre_price) / _pre_price
+		_pvt = _pre_pvt + price_change * data ['V']
+		pvt.append (_pvt)
+
+	return pvt.copy ()
+
 def MA (data, period, interest, ma_type):
 	ret = abstract.MA (data, timeperiod = period, price = interest, matype = ma_type)
 	return ret
