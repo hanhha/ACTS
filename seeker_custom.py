@@ -19,7 +19,50 @@ class Seeker (seeker.BaseSeeker):
 	def store (self, data):
 		self.pre_ptrend = self._pre_cand_trend if 'trend' in self.prediction.keys() else None
 		seeker.BaseSeeker.store (self, data)
-		
+	
+	def previous_optima (self, optima = 'canyon', price = 'C', prev_idx = 0, pcmp = 'gtoe', pivot = 0):
+		if (optima in ['canyon', 'peak', 'rising', 'falling']):
+			start_idx = prev_idx
+			findout   = False
+			idx = None
+			while (not findout) and ((self.archieve_len - start_idx) > 2):
+				i0 = self.archieve_len - start_idx
+				i1 = self.archieve_len - i0 - 1
+				i2 = self.archieve_len - i1 - 1
+				if optima == 'canyon':
+					if self.archieve[i2][price] > self.archieve[i1][price] < self.archieve[i0][price]
+						findout = True
+						idx     = i1
+				elif optima == 'peak':
+					if self.archieve[i2][price] < self.archieve[i1][price] > self.archieve[i0][price]
+						findout = True
+						idx     = i1
+				elif optima == 'rising':
+					if self.archieve[i2][price] < self.archieve[i1][price] < self.archieve[i0][price]
+						findout = True
+						idx     = i1
+				elif optima == 'falling':
+					if self.archieve[i2][price] > self.archieve[i1][price] > self.archieve[i0][price]
+						findout = True
+						idx     = i1
+				if findout:
+					if pcmp == 'gtoe' and self.archieve[idx][price] >= pivot:
+						findout = True
+					elif pcm == 'gt' and self.archieve[idx][price] > pivot:
+						findout = True
+					elif pcm == 'ltoe' and self.archieve[idx][price] <= pivot:
+						findout = True
+					elif pcm == 'lt' and self.archieve[idx][price] < pivot:
+						findout = True
+					elif pcm == 'e' and self.archieve[idx][price] == pivot:
+						findout = True
+					else:
+						findout = False
+				start_idx -= 1
+			return idx, self.archieve[idx][price] if findout else None, None
+		else:
+			return None, None
+
 	def predict_trend (self, data):
 		# C > EMA3 and C > SMA3: rising
 		# C < EMA3 and C < SMA3: falling
@@ -33,16 +76,30 @@ class Seeker (seeker.BaseSeeker):
 		sma3 = ta.sMA (self.pdarchieve, 3, 'C', MA_Type.SMA)[self.archieve_len-1]
 		c        = data ['C']
 		
-		d  = (ema3 - sma3) / sma3
+		d  = ema3 - sma3
 		
-		if c > ema3 and c > sma3:
-			ptrend = 'rising' if d >= -0.55 else 'peak'
-			self._pre_cand_trend = 'rising'
-		elif c < ema3 and c < sma3:
-			ptrend = 'falling' if d <= 0.55 else 'canyon'
-			self._pre_cand_trend = 'falling'
-		else:
-			ptrend =  self.pre_ptrend if self.pre_ptrend is not None else ('rising' if d >= 0 else 'falling')
+		if self.pre_ptrend == 'rising':
+			if c > ema3 and c > sma3:
+				ptrend = 'rising'
+			elif self.previous_optima ('peak', 'C', 1, data['C'])
+		#	self._pre_cand_trend = 'rising'
+		#elif c < ema3 and c < sma3:
+		#	ptrend = 'falling' if d <= 0.55 else 'canyon'
+		#	self._pre_cand_trend = 'falling'
+		#else:
+		#	ptrend =  self.pre_ptrend if self.pre_ptrend is not None else ('rising' if d >= 0 else 'falling')
+		if data['C'] >= self.archieve [self.archieve_len-1]['C']:
+			i0, p0 = self.previous_optima ('peak', 'C', 0)
+			i1, p1 = self.previous_optima ('peak', 'C', 1)
+			if p0 is not None and p1 is not None:
+				ptrend = 'rising' if p0 > p1
+		i0, c0 = self.previous_optima ('cayon', 'C', 0)
+		i1, c1 = self.previous_optima ('cayon', 'C', 0)
+		i0, p0 = self.previous_optima ('peak', 'C', 0)
+		i1, p1 = self.previous_optima ('peak', 'C', 0)
+
+		if c1 is not None and c0 is not None:
+			if c1 > c0:
 		
 		self.prediction ['trend'] = ptrend
 		
@@ -53,9 +110,9 @@ class Seeker (seeker.BaseSeeker):
 		# Desired point:  canyon
 		sd = ta.sSD (self.pdarchieve, 6, 'C', MA_Type.SMA)[self.archieve_len-1]
 		
-		#goal_archieved =  sd > (self._goal * data['Last'])
-		goal_archieved  = True
-		pvt = ta.PVT (self.archieve, 'C')
+		#expected_goal_archieved =  sd > (self._goal * data['Last'])
+		expected_goal_archieved  = True
+		trend_
 		bearish_signal  = ((self.predict('trend',data) == 'canyon') or (self.predict('trend',data) == 'rising' and self.pre_ptrend == 'falling')) and 
 		if profitable:
 			print ('Predict trend {t} - previous predicted trend {pt}'.format(t = self.predict('trend',data), pt = self.pre_ptrend))
