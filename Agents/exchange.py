@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import bittrex as exchg
-import acts_config as cfg
+from . import acts_config as cfg
 
 fee = 0.0025
 

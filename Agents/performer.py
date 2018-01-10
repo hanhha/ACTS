@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-import exchange as exch
-import misc_utils as misc
+from . import exchange as exch
+from . import misc_utils as misc
 from time import sleep
 
 class Performer (misc.BPA):

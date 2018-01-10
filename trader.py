@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
 from functools import reduce
-import misc_utils as misc
-from monitor      import Monitor     as Mon
-from evaluator    import ProfitEvaluator, PredictEvaluator 
-from strategy     import Strategy
-from performer    import Performer   as Perf
-from risk_mgnt    import RiskMgnt    as Risk
+from Agents           import misc_utils as misc
+from Agents.monitor   import Monitor as Mon
+from Agents.evaluator import (ProfitEvaluator, PredictEvaluator) 
+from Agents.strategy  import Strategy
+from Agents.performer import Performer as Perf
+from Agents.risk_mgnt import RiskMgnt as Risk
 
 import trader_cfg as cfg
 

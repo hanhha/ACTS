@@ -2,9 +2,8 @@
 
 from threading import Thread, Event
 from time import sleep
-import exchange as exch
-import misc_utils as misc
-
+from . import misc_utils as misc
+from . import exchange as exch
 
 class Monitor (misc.BPA):
 	def __init__ (self, params):

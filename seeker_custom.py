@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
 from talib import MA_Type
-import ta
-import misc_utils as misc
-import exchange as exch
-import seeker
+from Agents import ta
+from Agents import misc_utils as misc
+from Agents import exchange as exch
+from Agents import seeker
 
 class Seeker (seeker.BaseSeeker):
 	def __init__ (self, source, params):

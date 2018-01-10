@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import misc_utils as misc
+from . import misc_utils as misc
 
 class Evaluator (misc.BPA):
 	def __init__ (self, source):

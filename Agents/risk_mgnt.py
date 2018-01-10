@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import misc_utils as misc
+from . import misc_utils as misc
 
 class RiskMgnt (misc.BPA):
 	def __init__ (self, source, params):

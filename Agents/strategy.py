@@ -1,5 +1,4 @@
-import misc_utils as misc
-import trader_cfg as cfg
+from . import misc_utils as misc
 from time import time
 
 class Strategy (misc.BPA):
