@@ -1,4 +1,5 @@
 #/usr/bin/env python3
+import matplotlib.pyplot as plt
 
 def norm (param):
 	if type(param) is str:
@@ -64,5 +65,33 @@ class BPA (object): # Base Processing Agent
 	def BindTo (self, cb):
 		self._observer.append (cb)
 
+class MouseLine(object):
+    def __init__(self, ax, direction = 'V', color = 'red'):
+        self.ax = ax
+        self.direction = direction
+        self.lines = list()
+        for a in self.ax:
+            if direction == 'V':
+                self.lines.append(a.axvline (x = 0, ymin = 0, ymax = 1, c = color, linewidth=0.5, zorder = 0))
+            elif direction == 'H':
+                self.lines.append(a.axhline (y = 0, xmin = 0, xmax = 1, c = color, linewidth=0.5, zorder = 0))
 
+    def show_line(self, event):
+        if event.inaxes in self.ax:
+            for l in self.lines:
+                x, y = l.get_data(True)
+                if self.direction == 'V':
+                    x = [event.xdata for i in x]
+                elif self.direction == 'H':
+                    y = [event.ydata for i in y]
+                l.set_data(x, y)
+                l.set_visible(True)
+        #else:
+        #    self.line.set_visible(False)
+        plt.draw()
 
+def draw_hthresholds (ax, base = 0, upper = 30, lower = -30, color = 'red', show_base = True):
+    ax.axhline (y = base + upper, xmin = 0, xmax = 1,c=color, linewidth=0.5, zorder = 0)
+    if show_base:
+        ax.axhline (y = base , xmin = 0, xmax = 1,c=color, linewidth=0.5, zorder = 0)
+    ax.axhline (y = base + lower, xmin = 0, xmax = 1,c=color, linewidth=0.5, zorder = 0)

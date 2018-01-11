@@ -30,7 +30,7 @@ def PVT (datalist, price, pre_pvt = 0):
 	pvt = list ()
 	for idx, data in enumerate(datalist):
 		if idx > 0:
-			_pre_price = data_list[idx - 1][price]
+			_pre_price = datalist[idx - 1][price]
 			_pre_pvt   = pvt [idx - 1]
 		else:
 			_pre_price = data ['O']
