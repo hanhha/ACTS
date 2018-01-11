@@ -30,19 +30,19 @@ class Seeker (seeker.BaseSeeker):
 				i1 = self.archieve_len - i0 - 1
 				i2 = self.archieve_len - i1 - 1
 				if optima == 'canyon':
-					if self.archieve[i2][price] > self.archieve[i1][price] < self.archieve[i0][price]
+					if self.archieve[i2][price] > self.archieve[i1][price] < self.archieve[i0][price]:
 						findout = True
 						idx     = i1
 				elif optima == 'peak':
-					if self.archieve[i2][price] < self.archieve[i1][price] > self.archieve[i0][price]
+					if self.archieve[i2][price] < self.archieve[i1][price] > self.archieve[i0][price]:
 						findout = True
 						idx     = i1
 				elif optima == 'rising':
-					if self.archieve[i2][price] < self.archieve[i1][price] < self.archieve[i0][price]
+					if self.archieve[i2][price] < self.archieve[i1][price] < self.archieve[i0][price]:
 						findout = True
 						idx     = i1
 				elif optima == 'falling':
-					if self.archieve[i2][price] > self.archieve[i1][price] > self.archieve[i0][price]
+					if self.archieve[i2][price] > self.archieve[i1][price] > self.archieve[i0][price]:
 						findout = True
 						idx     = i1
 				if findout:
