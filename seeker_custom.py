@@ -13,12 +13,12 @@ class Seeker (BaseSeeker):
 		
 	def predict_trend (self, data):
 		#TODO: override this method
-		BaseSeeker.predict_trend (self, data)
+		return BaseSeeker.predict_trend (self, data)
 
 	def predict_profitable (self, data):
 		#TODO: override this method
-		BaseSeeker.predict_profitable (self, data)
+		return BaseSeeker.predict_profitable (self, data)
 
 	def predict_harvestable (self, data):
 		#TODO: override this method
-		BaseSeeker.predict_harvestable (self, data)
+		return BaseSeeker.predict_harvestable (self, data)
