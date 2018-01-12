@@ -72,9 +72,9 @@ class MouseLine(object):
         self.lines = list()
         for a in self.ax:
             if direction == 'V':
-                self.lines.append(a.axvline (x = 0, ymin = 0, ymax = 1, c = color, linewidth=0.5, zorder = 0))
+                self.lines.append(a.axvline (x = 0, ymin = 0, ymax = 1, c = color, linewidth=0.5, zorder = 5))
             elif direction == 'H':
-                self.lines.append(a.axhline (y = 0, xmin = 0, xmax = 1, c = color, linewidth=0.5, zorder = 0))
+                self.lines.append(a.axhline (y = 0, xmin = 0, xmax = 1, c = color, linewidth=0.5, zorder = 5))
 
     def show_line(self, event):
         if event.inaxes in self.ax:
