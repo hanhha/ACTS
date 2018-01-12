@@ -30,7 +30,7 @@ class Monitor (misc.BPA):
 		if not resc:
 			print ('Can not get history from exchange, please check')
 		else:
-			for tick in ticks [-self._params['sim_period']:] if len(ticks) > self._params['sim_period'] else ticks:
+			for tick in ticks:
 				ticker = {'Ask':None,'Bid':None,'Last':tick['C']}   
 				data = {**tick, **ticker}
 				self.BroadCast (data)

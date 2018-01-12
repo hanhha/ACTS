@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-import misc_utils as misc
-import exchange as exch
+from . import misc_utils as misc
 from pandas import DataFrame
 
 class BaseSeeker (misc.BPA):
@@ -21,9 +20,13 @@ class BaseSeeker (misc.BPA):
 		self._goal = self._params ['goal']
 		self._fee  = self._params ['fee']
 
+	def check_profit_achieved (self, price):
+		gprice = price * (1 - self._fee)
+		return (gprice * self._qty_bought) > (self._investment)
+	
 	def check_goal_achieved (self, price):
-		# TODO
-		return True
+		gprice = price * (1 - self._fee)
+		return (gprice * self._qty_bought) > (self._investment*(1 + self._goal))  
 
 	def store (self, data):
 		self.archieve.append (data)
@@ -48,16 +51,19 @@ class BaseSeeker (misc.BPA):
 			return self.predict_harvestable (data)
 
 	def predict_trend (self, data):
-		#TODO
-		return True
+		ptrend = True
+		self.prediction ['trend'] = ptrend
+		return ptrend
 
 	def predict_profitable (self, data):
-		#TODO
-		return True
+		ptb = True
+		self.prediction ['profitable'] = ptb
+		return ptb
 
 	def predict_harvestable (self, data):
-		#TODO
-		return True
+		hvb = True
+		self.prediction ['harvestable'] = hvb
+		return hvb
 
 	def CallBack (self, data):
 		if data[0] == 'buy':

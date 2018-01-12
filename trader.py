@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-
-from functools import reduce
+from time import time
 from Agents           import misc_utils as misc
 from Agents.monitor   import Monitor as Mon
 from Agents.evaluator import (ProfitEvaluator, PredictEvaluator) 
@@ -34,7 +33,7 @@ class Trader (misc.BPA):
 		if not self._params ['trial']:
 			try:
 				while True:
-					sleep (1)
+					time.sleep (1)
 			except KeyboardInterrupt:
 				print ('User interrupted.')
 
@@ -43,7 +42,7 @@ class Trader (misc.BPA):
 if __name__ == "__main__":
 	trader = Trader (source = None, params = cfg.configuration, agent_params = cfg.strategy_agents) 
 	if cfg.configuration ['trial']:
-		print ('\n' + 'Running simulation for {mar} market with {n} latest candle ticks ...'.format (mar = cfg.configuration ['market'], n = cfg.configuration ['sim_period']))  
+		print ('\n' + 'Running simulation for {mar} market ...'.format (mar = cfg.configuration ['market']))  
 	else:
 		print ('\n' + 'Running auto trader for {mar} market ...'.format (mar = cfg.configuration ['market']))
 

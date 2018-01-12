@@ -1,5 +1,4 @@
 from . import misc_utils as misc
-from time import time
 
 class Strategy (misc.BPA):
 	def __init__ (self, source, agents, params, risk_mgnt):
