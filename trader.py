@@ -34,17 +34,25 @@ class Trader (misc.BPA):
 			try:
 				while True:
 					time.sleep (1)
-			except KeyboardInterrupt:
-				print ('User interrupted.')
-
+			except	(KeyboardInterrupt, SystemExit): 
+				print ("Interrupt received. Stoping auto trading system ...")
 			self.monitor.stop ()	
 
 if __name__ == "__main__":
 	trader = Trader (source = None, params = cfg.configuration, agent_params = cfg.strategy_agents) 
+	print ('\n' + 'Welcome. I can help you to monitor and trade crypto coins. But it would be better if under supervisor...')
 	if cfg.configuration ['trial']:
-		print ('\n' + 'Running simulation for {mar} market ...'.format (mar = cfg.configuration ['market']))  
+		print ('\n' + 'Running simulation for {mar} market.'.format (mar = cfg.configuration ['market']))  
 	else:
-		print ('\n' + 'Running auto trader for {mar} market ...'.format (mar = cfg.configuration ['market']))
+		print ('Please be kindly notice that I can simulate your trading based on your strategy...')
+		print ('Make sure that you are running on trial mode by enable it in trader_cfg.py file if you are unsure about what you are doing...')
+		print ('You can stop auto trading system whenever you decide by pressing Ctrl-C (or Ctrl-Break on Windows) ...')
+		ans = input ('If you answer \'yes\', real trading with your real money will be performed. Do you really want to run on real mode?')
+		if ans == 'yes':
+			print ('\n' + 'Running auto trader for {mar} market.'.format (mar = cfg.configuration ['market']))
+		else:
+			print ('Smart choice right now.')
+			quit ()
 
 	trader.start ()
 	trader.idle  ()

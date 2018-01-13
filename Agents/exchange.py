@@ -21,7 +21,7 @@ def buy_limit (market, qty, price):
 	return mAPI.buy_limit (market, qty, price)
 
 def sell_limit (market, qty, price):
-	return sell_limit (market, qty, price)
+	return mAPI.sell_limit (market, qty, price)
 
 def get_ticker (market):
 	return pAPIv1.get_ticker (market)
