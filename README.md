@@ -17,10 +17,10 @@ class Seeker(BaseSeeker):
 	#history data is stored in self.archive (list type) and self.pdarchieve (pandas DataFrame type)
 	
 	def predict_profitable (self, data):
-		<your code to return True if this is bullish signal
+		<your code to return True if this is bullish signal>
 		
 	def predict_harvestable (self, data):
-		<your code to return True if this is bearish signal
+		<your code to return True if this is bearish signal>
 		
 	def predict_trend (self, data):
 		<your code to return the prediction of trend which is among of ['peak', 'canyon', 'risng', 'falling', 'stable']>
