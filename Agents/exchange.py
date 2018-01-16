@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from datetime import datetime as dt
 import bittrex as exchg
 from . import acts_config as cfg
 
@@ -12,7 +13,11 @@ mAPI = exchg.MarketAPI  (exchg.API_V1_1, cfg.config['Bittrex']['API_KEY'].encode
 aAPI = exchg.AccountAPI (exchg.API_V1_1, cfg.config['Bittrex']['API_KEY'].encode('utf-8'), cfg.config['Bittrex']['API_SECRET'].encode('utf-8')) 
 
 def get_candle_ticks (market, interval, get_last_only = True):
-	return pAPIv2.get_ticks (market, interval, get_last_only)
+	status, data = pAPIv2.get_ticks (market, interval, get_last_only)
+	if status:
+		for dat in data:
+			dat['T'] = dt.strptime(dat['T'],'%Y-%m-%dT%H:%M:%S')
+	return status, data
 
 def get_balance (cur):
 	return aAPI.get_balance (cur)

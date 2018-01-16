@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 
+import talib
 from talib import abstract
 import pandas as pd
+
+CandleSticksPatternList = talib.get_function_groups()['Pattern Recognition']
 
 def pandas_convert (dictdata):
 	return pd.DataFrame (dictdata)
@@ -56,3 +59,19 @@ def SD (data, period, interest, ma_type):
 def sSD (data, period, interest, ma_type):
 	_data, mul = scale_up (data, interest)
 	return SD (_data, period, interest, ma_type) / mul
+
+def pattern_recognize (data, op, cp, hp, lp):
+	df = pd.DataFrame (data)
+	inputs = {
+			'open': df[op].values,
+			'close': df[cp].values,
+			'high': df[hp].values,
+			'low': df[lp].values,
+			}
+
+	ret_list = list()
+	for pt in CandleSticksPatternList:
+		func = abstract.Function(pt)
+		ret_list.append({'name':pt, 'marks': func (inputs)})
+
+	return list(filter(lambda x: x['marks'][-1] != 0, ret_list))
