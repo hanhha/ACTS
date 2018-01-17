@@ -20,13 +20,13 @@ class Evaluator (misc.BPA):
 	
 	def print_all (self, idx = None):
 		if idx is not None:
-			print ('Monitored data at time {t}'.format (t = idx))
-			print (self.archieve [idx])
+			self.shout ('Monitored data at time {t}'.format (t = idx))
+			self.shout (self.archieve [idx])
 		else:
 			for i, entry in enumerate(self.archieve):
-				print ('Monitored data at time {t}'.format (t = i))
-				print (entry)
-				print ('----------------')
+				self.shout ('Monitored data at time {t}'.format (t = i))
+				self.shout (entry)
+				self.shout ('----------------')
 	
 	def visualize (self):
 		assert "Not implemented yet.", 0
@@ -59,15 +59,15 @@ class ProfitEvaluator (Evaluator):
 		if data[0] == 'buy':
 			self.archieve.append ([data[1], data[2]['uuid']])
 			self._gross_invest = data[2]['price'] + data[2]['fee']
-			print ('\rBought with gross price {price}'.format (price = self._gross_invest), end = '', flush = True)
+			self.shout ('Bought with gross price {price}'.format (price = self._gross_invest))
 		elif data[0] == 'sell':
 			gross_return = data[2]['price'] - data[2]['fee']
 			d = gross_return - self._gross_invest
 			profit = {'diff': d, 'percent': d / self._gross_invest}
 			self.archieve[-1].extend ([data[1], data[2]['uuid'], profit])
-			print ('\rBought with gross price {iprice} - Sold with gross price {hprice} - Profit {p}'.format (iprice = self._gross_invest, hprice = gross_return, p = d))
+			self.shout ('Sold with gross price {hprice} - Profit {p}'.format (hprice = gross_return, p = d))
 		else:
-			print ('Unknown data for profit evaluation.')
+			self.shout ('Unknown data for profit evaluation.')
 
 class PredictEvaluator (Evaluator):
 	def record (self, data):
@@ -122,4 +122,4 @@ class PredictEvaluator (Evaluator):
 			elif ed[0] == ed[1]:
 				self.archieve [-2] ['reality'] = 'stable'
 			else:
-				print ('Not an expected case')
+				self.shout ('Not an expected case')

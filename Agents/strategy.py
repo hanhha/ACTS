@@ -27,7 +27,7 @@ class Strategy (misc.BPA):
 		else:
 			risk, goal_achieved, predict, harvestable = self.check_harvestable (data)
 			if risk:
-				#print ('Risk {r}'.format(r=risk))
+				#self.shout ('Risk {r}'.format(r=risk))
 				act = ['sell', data ['T']]# if predict == 'falling' or predict == 'peak' else [None]
 			else:
 				act = ['sell', data ['T']] if harvestable else [None]

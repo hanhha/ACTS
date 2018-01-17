@@ -21,33 +21,6 @@ def fill_outQ (outQ, qDat):
 	for q in outQ:
 		q.put (qDat, block = True)
 
-class Archive ():
-	def __init__ (self, length):
-		self._length = length
-		self._data = list ()
-		
-	def most_recent (self):
-		return self._data [-1] if len(self._data) > 0 else None
-		
-	def data (self, b = None, e = None):
-		if len (self._data) == 0:
-			return None
-		else:
-			if b is None and e is None:
-				return self._data.copy ()
-			elif b is None:
-				return self._data [:e]
-			elif e is None:
-				return self._data [b:]
-			else:
-				return self._data [b:e]
-			
-	def push (self, dat):
-		self._data.append (dat)
-		if len (self._data) > self._length:
-			del self._data [0]
-		
-
 class BPA (object): # Base Processing Agent
 	def __init__ (self, source = None, params = {}):
 		self._source = None 
@@ -57,6 +30,7 @@ class BPA (object): # Base Processing Agent
 		if len(params) > 0:
 			self.setParams (params)
 		self._observer = list ()
+		self._print_func = None
 
 	def Bind (self, source):
 		self._source = source
@@ -64,9 +38,18 @@ class BPA (object): # Base Processing Agent
 
 	def setParams (self, params):
 		self._params = params.copy ()
+		if 'print_func' in self._params.keys():
+			self._print_func = self._params['print_func']
+
+	def shout (self, text):
+		if self._print_func is not None:
+			_text = repr(text) if type(text) is not str else text
+			self._print_func (_text)
+		else:
+			print (text)
 
 	def CallBack (self, data):
-		print (data)
+		self.shout (data)
 
 	def BroadCast (self, data):
 		for cb in self._observer:

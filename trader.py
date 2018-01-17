@@ -38,12 +38,15 @@ class Trader (misc.BPA):
 		else:
 			self.monitor.start_sim ()
 
+		while self.monitor._Stop.is_set ():
+			self.monitor._Stop.wait (1)
+
 	def idle (self):
 		try:
-			while True:
-				sleep (1)
+			while not self.monitor._Stop.is_set():
+				self.monitor._Stop.wait (1)
 		except	(KeyboardInterrupt, SystemExit): 
-			print ("Interrupt received. Stoping auto trading system ...")
+			print ("\rInterrupt received. Stoping auto trading system ...")
 
 		self.monitor.stop ()	
 
@@ -58,32 +61,74 @@ def get_figure ():
 	return p
 
 def draw_up_candles ():
-	g0 = Segment (x0 = 'T', y0 = 'H', x1 = 'T', y1 = 'L', color = 'black')
+	g0 = Segment (x0 = 'T', y0 = 'H', x1 = 'T', y1 = 'L', line_color = 'black')
 	g1 = VBar    (x = 'T', top = 'C', bottom = 'O', width = 250000, fill_color = 'green', line_color = 'black')
 	
-	return g0, g1 
+	return (g0, g1)
 
 def draw_down_candles ():
-	g0 = Segment (x0 = 'T', y0 = 'H', x1 = 'T', y1 = 'L', color = 'black')
+	g0 = Segment (x0 = 'T', y0 = 'H', x1 = 'T', y1 = 'L', line_color = 'black')
 	g1 = VBar    (x = 'T', top = 'O', bottom = 'C', width = 250000, fill_color = 'red', line_color = 'black')
 	
-	return g0, g1 
+	return (g0, g1) 
 
 def draw_stand_candles ():
-	g0 = Segment (x0 = 'T', y0 = 'H', x1 = 'T', y1 = 'L', color = 'black')
+	g0 = Segment (x0 = 'T', y0 = 'H', x1 = 'T', y1 = 'L', line_color = 'black')
 	g1 = VBar    (x = 'T', top = 'O', bottom = 'C', width = 250000, fill_color = 'black', line_color = 'black')
 	
-	return g0, g1 
+	return (g0, g1) 
 
 def draw_sell ():
-	g0 = Triangle (x = 'T', y = 'price', size = 10, color = 'red', angle = pi, fill_alpha = 0.8)
+	g0 = Triangle (x = 'T', y = 'price', size = 10, fill_color = 'red', angle = pi, fill_alpha = 0.8)
 
 	return g0 
 
 def draw_buy ():
-	g0 = Triangle (x = 'T', y = 'price', size = 10, color = 'green', angle = 0.0, fill_alpha = 0.8)
+	g0 = Triangle (x = 'T', y = 'price', size = 10, fill_color = 'green', angle = 0.0, fill_alpha = 0.8)
 
 	return g0 
+
+class DataCvt(misc.BPA):
+	def CallBack (self, data):
+		new_data = {'candlestick':{}}
+
+		if data['C'] > data['O']:
+			new_data['candlestick']['upstick'] = {
+					 'L': data['L'],
+					 'H': data['H'],
+					 'C': data['C'],
+					 'O': data['O'],
+					 'T': data['T']
+				}
+		elif data['C'] < data['O']:
+			new_data['candlestick']['downstick'] = {
+					 'L': data['L'],
+					 'H': data['H'],
+					 'C': data['C'],
+					 'O': data['O'],
+					 'T': data['T']
+				}
+		else:
+			new_data['candlestick']['standstick'] = {
+					 'L': data['L'],
+					 'H': data['H'],
+					 'C': data['C'],
+					 'O': data['O'],
+					 'T': data['T']
+				}
+
+		if data['D'] == True:
+			new_data['candlestick']['buy_decision'] = {
+					 'price': data['L'],
+					 'T': data['T']
+				}
+		elif data['D'] == False:
+			new_data['candlestick']['sell_decision'] = {
+					 'price': data['H'],
+					 'T': data['T']
+				}
+
+		self.BroadCast (new_data)
 
 
 if __name__ == "__main__":
@@ -92,15 +137,18 @@ if __name__ == "__main__":
 
 	plotting = chart.PlottingServer (title = 'Auto Crypto Trading System for market {mar}'.format (mar = cfg.configuration['market']), port = 8888, allow_websocket_origin = ['localhost:8888','enco.hopto.org:8888'])
 
-	plotting.add_plot ('candlestick', get_figure())
+	cvt = DataCvt()
 
-	plotting.add_glyph ('candlestick', 'upstick', draw_up_candles(), {'T':[],'H':[],'L':[],'O':[],'C':[]})
-	plotting.add_glyph ('candlestick', 'downstick', draw_down_candles(), {'T':[],'H':[],'L':[],'O':[],'C':[]})
-	plotting.add_glyph ('candlestick', 'standstick', draw_stand_candles(), {'T':[],'H':[],'L':[],'O':[],'C':[]})
-	plotting.add_glyph ('candlestick', 'buy_decision', draw_buy(), {'T':[],'price':[]})
-	plotting.add_glyph ('candlestick', 'sell_decision', draw_sell(), {'T':[],'price':[]})
+	plotting.add_plot ('candlestick', get_figure)
 
-	trader.predict_eva.BindTo (plotting.CallBack)
+	plotting.add_glyph ('candlestick', 'upstick', draw_up_candles, {'T':[],'H':[],'L':[],'O':[],'C':[]})
+	plotting.add_glyph ('candlestick', 'downstick', draw_down_candles, {'T':[],'H':[],'L':[],'O':[],'C':[]})
+	plotting.add_glyph ('candlestick', 'standstick', draw_stand_candles, {'T':[],'H':[],'L':[],'O':[],'C':[]})
+	plotting.add_glyph ('candlestick', 'buy_decision', draw_buy, {'T':[],'price':[]})
+	plotting.add_glyph ('candlestick', 'sell_decision', draw_sell, {'T':[],'price':[]})
+
+	trader.predict_eva.BindTo (cvt.CallBack)
+	cvt.BindTo (plotting.CallBack)
 
 	clearscreen ()
 
@@ -146,7 +194,7 @@ if __name__ == "__main__":
 	pprint ("Press Ctrl-C or Ctrl-Break (Windows) to stop ...\n", pos = 'home')
 
 	trader.idle  ()
-	print ('\n' + 'Finish.')
+	pprint ('\n' + 'Finish.')
 
 	profit_data = trader.profit_eva.archieve
 	if len(profit_data) > 0:
@@ -164,15 +212,17 @@ if __name__ == "__main__":
 		gains      = 0
 		unchanges  = 0
 
-	print ('\n' + 'Reports')
-	print ('----------------------------------------------------')
-	print ('Num of investment cycles     | {0:<20}'.format (len(profit_data)))
-	print ('Gains                        | {0:<20}'.format(gains))
-	print ('Losses                       | {0:<20}'.format(losses))
-	print ('Unchanges                    | {0:<20}'.format(unchanges))
-	print ('----------------------------------------------------')
-	print ('Profit                       | {0:<20}'.format(profit))
+	pprint ('\n' + 'Reports')
+	pprint ('----------------------------------------------------')
+	pprint ('Num of investment cycles     | {0:<20}'.format (len(profit_data)))
+	pprint ('Gains                        | {0:<20}'.format(gains))
+	pprint ('Losses                       | {0:<20}'.format(losses))
+	pprint ('Unchanges                    | {0:<20}'.format(unchanges))
+	pprint ('----------------------------------------------------')
+	pprint ('Profit                       | {0:<20}'.format(profit))
 
 	ans = ''
 	while ans != 'quit':
 		ans = input ("Type \'quit\' to exit: ")
+	
+	plotting.stop ()

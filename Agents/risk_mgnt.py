@@ -19,7 +19,7 @@ class RiskMgnt (misc.BPA):
 		return self._enable and ((ppu * self._bqty) <= (self._gprice * (1 - self._accepted_loss)))
 
 	def set_bought_price (self, price, commission, qty):
-		#print ('Bid booked succesfully. Keep track {p} - {q}'.format (p = price, q = qty))
+		#self.shout ('Bid booked succesfully. Keep track {p} - {q}'.format (p = price, q = qty))
 		self._bqty   = qty
 		self._gprice = price + commission	
 		self._enable = True

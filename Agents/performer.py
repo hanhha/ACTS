@@ -73,7 +73,7 @@ class Performer (misc.BPA):
 								'fee'  : p*q*self._params['fee'],
 								'uuid' : '12345'}))	
 			else:
-				print ('Not enough base currency')
+				self.shout ('Not enough base currency')
 				
 		else:
 			status = self.buy (mar, price, qty)
@@ -81,7 +81,7 @@ class Performer (misc.BPA):
 				order_info = wait (status[1])
 				self.BroadCast (('buy', tag, order_info)) 			
 			else:
-				print ('Buy order was not placed succesfully.')
+				self.shout ('Buy order was not placed succesfully.')
 
 	def harvest (self, params):
 		qty    = params ['amount']
@@ -103,7 +103,7 @@ class Performer (misc.BPA):
 				order_info = wait (status[1])
 				self.BroadCast (('sell', tag, order_info)) 			
 			else:
-				print ('Sell order was not placed succesfully.')
+				self.shout ('Sell order was not placed succesfully.')
 
 	def CallBack (self, data):
 		if data['act'] [0] == 'buy':
