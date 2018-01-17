@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 from time import time, sleep
+from math import pi
+
+from bokeh.plotting import figure
+from bokeh.models.glyphs import VBar, Segment
+from bokeh.models.markers import Triangle 
 
 from Agents           import misc_utils as misc
 from Agents.monitor   import Monitor as Mon
@@ -9,6 +14,7 @@ from Agents.performer import Performer as Perf
 from Agents.risk_mgnt import RiskMgnt as Risk
 
 from Agents.console_utils import *
+from Agents           import chart_utils as chart
 
 import trader_cfg as cfg
 
@@ -44,13 +50,64 @@ class Trader (misc.BPA):
 		self.predict_eva.save ('predict_{mar}.json'.format(mar = cfg.configuration['market']))
 		self.profit_eva.save ('profit_{mar}.json'.format(mar = cfg.configuration['market']))
 
+def get_figure ():
+	p = figure(x_axis_type = 'datetime', sizing_mode = 'scale_width', plot_height = 200)
+	p.xaxis.major_label_orientation = pi/4
+	p.grid.grid_line_alpha = 0.6
+
+	return p
+
+def draw_up_candles ():
+	g0 = Segment (x0 = 'T', y0 = 'H', x1 = 'T', y1 = 'L', color = 'black')
+	g1 = VBar    (x = 'T', top = 'C', bottom = 'O', width = 250000, fill_color = 'green', line_color = 'black')
+	
+	return g0, g1 
+
+def draw_down_candles ():
+	g0 = Segment (x0 = 'T', y0 = 'H', x1 = 'T', y1 = 'L', color = 'black')
+	g1 = VBar    (x = 'T', top = 'O', bottom = 'C', width = 250000, fill_color = 'red', line_color = 'black')
+	
+	return g0, g1 
+
+def draw_stand_candles ():
+	g0 = Segment (x0 = 'T', y0 = 'H', x1 = 'T', y1 = 'L', color = 'black')
+	g1 = VBar    (x = 'T', top = 'O', bottom = 'C', width = 250000, fill_color = 'black', line_color = 'black')
+	
+	return g0, g1 
+
+def draw_sell ():
+	g0 = Triangle (x = 'T', y = 'price', size = 10, color = 'red', angle = pi, fill_alpha = 0.8)
+
+	return g0 
+
+def draw_buy ():
+	g0 = Triangle (x = 'T', y = 'price', size = 10, color = 'green', angle = 0.0, fill_alpha = 0.8)
+
+	return g0 
+
+
 if __name__ == "__main__":
 
 	trader = Trader (source = None, params = cfg.configuration, agent_params = cfg.strategy_agents) 
+
+	plotting = chart.PlottingServer (title = 'Auto Crypto Trading System for market {mar}'.format (mar = cfg.configuration['market']), port = 8888, allow_websocket_origin = ['localhost:8888','enco.hopto.org:8888'])
+
+	plotting.add_plot ('candlestick', get_figure())
+
+	plotting.add_glyph ('candlestick', 'upstick', draw_up_candles(), {'T':[],'H':[],'L':[],'O':[],'C':[]})
+	plotting.add_glyph ('candlestick', 'downstick', draw_down_candles(), {'T':[],'H':[],'L':[],'O':[],'C':[]})
+	plotting.add_glyph ('candlestick', 'standstick', draw_stand_candles(), {'T':[],'H':[],'L':[],'O':[],'C':[]})
+	plotting.add_glyph ('candlestick', 'buy_decision', draw_buy(), {'T':[],'price':[]})
+	plotting.add_glyph ('candlestick', 'sell_decision', draw_sell(), {'T':[],'price':[]})
+
+	trader.predict_eva.BindTo (plotting.CallBack)
+
 	clearscreen ()
+
 	pprint ('Auto Crypto Trading System', pos = 'home')
 	pprint ('\n' + 'Welcome. I can help you to monitor and trade crypto coins. But it would be better if under supervisor ...')
 	sleep (1)
+
 	if cfg.configuration ['simulation']:
 		print ('It\'s attemping to run simulation. A bunch of history data will be fetched from exchange server ...')
 		sleep (1)
@@ -83,10 +140,12 @@ if __name__ == "__main__":
 				quit ()
 
 	trader.start ()
+	plotting.idle ()
+
 	clearscreen ()
 	pprint ("Press Ctrl-C or Ctrl-Break (Windows) to stop ...\n", pos = 'home')
+
 	trader.idle  ()
-	
 	print ('\n' + 'Finish.')
 
 	profit_data = trader.profit_eva.archieve
@@ -104,6 +163,7 @@ if __name__ == "__main__":
 		losses     = 0
 		gains      = 0
 		unchanges  = 0
+
 	print ('\n' + 'Reports')
 	print ('----------------------------------------------------')
 	print ('Num of investment cycles     | {0:<20}'.format (len(profit_data)))
@@ -113,17 +173,6 @@ if __name__ == "__main__":
 	print ('----------------------------------------------------')
 	print ('Profit                       | {0:<20}'.format(profit))
 
-	from bokeh.server.server import Server
-	from bokeh.application import Application
-	from bokeh.application.handlers.function import FunctionHandler
-
-	def make_document (doc):
-		fig = trader.predict_eva.visualize()
-		doc.add_root(fig)
-		doc.title = "Auto crypto trading system for {mar}".format(mar = cfg.configuration['market'])
-
-	app = {'/': Application(FunctionHandler(make_document))}
-	
-	server = Server(app, port = 8888, allow_websocket_origin=['localhost:8888','enco.hopto.org:8888'])
-	server.run_until_shutdown ()
-
+	ans = ''
+	while ans != 'quit':
+		ans = input ("Type \'quit\' to exit: ")

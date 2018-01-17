@@ -1,11 +1,10 @@
-#!/usr/bin/env python3
-
-import simplejson as json
-from pandas import DataFrame
 from datetime import datetime as dt
 
 from . import misc_utils as misc
 from . import chart_utils as chart
+
+import simplejson as json
+from pandas import DataFrame
 
 class Evaluator (misc.BPA):
 	def __init__ (self, source):
@@ -50,7 +49,7 @@ class Evaluator (misc.BPA):
 			print ("Can not open data file.")
 		else:
 			for data in json_data:
-				data['T'] = dt.strptime(dat['T'],'%Y-%m-%dT%H:%M:%S')
+				data['T'] = dt.strptime(data['T'],'%Y-%m-%dT%H:%M:%S')
 				self.record (data)
 
 class ProfitEvaluator (Evaluator):
@@ -74,6 +73,23 @@ class PredictEvaluator (Evaluator):
 	def record (self, data):
 		self.add_data (data)
 		self.evaluate ()
+		
+		# Broadcast plotting data
+		if data['act'][0] == 'buy':
+			decision = True
+		elif data['act'][0] == 'sell':
+			decision = False
+		else:
+			decision = None
+
+		plot_data = {'T': data['T'],
+					 'L': data['L'],
+					 'H': data['H'],
+					 'C': data['C'],
+					 'O': data['O'],
+					 'D': decision} 
+
+		self.BroadCast (plot_data)	
 	
 	def add_data (self, data):
 		new_data = data.copy ()

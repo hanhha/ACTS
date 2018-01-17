@@ -5,7 +5,9 @@ from bokeh.application import Application
 from bokeh.application.handlers.function import FunctionHandler
 from bokeh.plotting import figure
 from bokeh.models import ColumnDataSource, Range1d, LabelSet, Label
-from bokeh.models.markers import Triangle
+
+from threading import Thread, Event
+from collections import OrderedDict
 
 class MouseLine(object):
     def __init__(self, ax, direction = 'V', color = 'red'):
@@ -97,3 +99,75 @@ def draw_lines (data, interest = 'C', timestamp = 'T', name = 'Line', color = 'r
 	
 	return fig
 
+class PlottingServer(object):
+	def __init__ (self, title = '', port = 8888, allow_websocket_origin=['localhost:8888','enco.hopto.org:8888']):
+		self._execThread = None
+
+		self.sources = dict()
+		self.plots   = OrderedDict ()
+		self.glyphs  = dict ()
+
+		self.new_data = dict ()
+
+		self.title = title
+		self.port = port
+		self.allow_websocket_origin = allow_websocket_origin
+
+	def add_plot (self, plot_key, plot):
+		self.sources [plot_key] = dict () 
+		self.plots [plot_key] = plot
+		self.new_data [plot_key] = dict ()
+
+	def add_glyph (self, plot_key, glyph_key, glyph, column_dict):
+		self.sources [plot_key][glyph_key] = ColumnDataSource(column_dict)
+		self.glyphs[plot_key][glyph_key] = glyph
+		self.new_data[plot_key][glyph_key] = dict ()
+
+	def idle (self):
+		self.app = {'/': Application(FunctionHandler(self.make_document))}
+		self.server = Server(self.app, port = self.port, allow_websocket_origin = self.allow_websocket_origin)
+
+		def monitor ():
+			self.server.start ()
+			self.server.io_loop.start ()
+
+		self._execThread = Thread (target = monitor)
+		self._execThread.daemon = True
+		self._execThread.start () 
+
+	def stop (self):
+		self.server.io_loop.stop ()
+		self._execThread.join ()
+
+	def CallBack (self, data):
+	#{plot:{glyph:{k:v}}}
+		for k_plot, plot_data in data.items():
+			for k_glyph, source in plot_data.items():
+				if k_plot not in self.new_data.keys():
+					self.new_data[k_plot] = {k_glyph:[]} 
+				else:
+					self.new_data[k_plot][k_glyph] = []
+				for k, v in source.items():
+					if k not in self.new_data[k_plot][k_glyph].keys():
+						self.new_data[k_plot][k_glyph] = {k:[v]}
+					else:
+						self.new_data[k_plot][k_glyph][k].append(v)
+
+	def make_document (self, doc):
+		def update ():
+			for kp, psource in self.sources.items():
+				for kg, gsource in psource.items():
+					if self.new_data[kp][kg]:
+						gsource.stream (self.new_data[kp][kg].copy())
+						self.new_data[kp][kg] = dict()
+
+		for k, plot in self.plots.items():
+			fig = plot 
+
+			for gk, gv in self.glyphs.items():
+				fig.add_glyph (self.sources[k][gk], gv)
+
+			doc.add_root (fig)
+
+		doc.add_periodic_callback (update, 1000)
+		doc.title = self.title 
