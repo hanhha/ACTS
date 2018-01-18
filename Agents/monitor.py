@@ -26,13 +26,11 @@ class Monitor (misc.BPA):
 		self._execThread = None
 
 	def start_sim (self):
-		self._Stop.clear ()
-		self.shout ('Fetching data ...')
 		resc, ticks = exch.get_candle_ticks (self._market, self._candle, False)
 		if not resc:
 			self.shout ('Can not get history from exchange, please check')
 		else:
-			self.shout ('Data fetched ...\n')
+			self._Stop.clear ()
 
 			def monitor ():
 				while (not self._Stop.is_set ()) and (len(ticks) > 0):
@@ -50,6 +48,7 @@ class Monitor (misc.BPA):
 			self._execThread.start () 
 
 	def start (self):
+		resc, ticks = exch.get_candle_ticks (self._market, self._candle, False)
 		self._Stop.clear ()
 		def monitor ():
 			while not self._Stop.is_set ():

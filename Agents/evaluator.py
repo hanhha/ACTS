@@ -59,13 +59,13 @@ class ProfitEvaluator (Evaluator):
 		if data[0] == 'buy':
 			self.archieve.append ([data[1], data[2]['uuid']])
 			self._gross_invest = data[2]['price'] + data[2]['fee']
-			self.shout ('Bought with gross price {price}'.format (price = self._gross_invest))
+			self.shout ('Bought with gross price {price}'.format (price = self._gross_invest), good = True)
 		elif data[0] == 'sell':
 			gross_return = data[2]['price'] - data[2]['fee']
 			d = gross_return - self._gross_invest
 			profit = {'diff': d, 'percent': d / self._gross_invest}
 			self.archieve[-1].extend ([data[1], data[2]['uuid'], profit])
-			self.shout ('Sold with gross price {hprice} - Profit {p}'.format (hprice = gross_return, p = d))
+			self.shout ('Sold with gross price {hprice} - Profit {p}'.format (hprice = gross_return, p = d), good = d > 0)
 		else:
 			self.shout ('Unknown data for profit evaluation.')
 

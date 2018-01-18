@@ -69,3 +69,10 @@ class BaseSeeker (misc.BPA):
 		if data[0] == 'buy':
 			self._investment = data[2]['price'] + data[2]['fee']
 			self._qty_bought = data[2]['qty']
+
+	def printCandleStick (self, data):
+		good = data['C'] > data['O']
+		self.shout ("Candle stick at {t}".format(t = str(data['T'])))
+		self.shout ("O = {o} : C = {c} : H = {h} : L = {l}".format (h = data['H'], c = data['C'], o = data['O'], l = data['L']), good = good)
+		self.shout ("Bid = {b} : Ask = {a} : Last = {l}".format (b = data['Bid'], a = data['Ask'], l = data['Last']), good = good)
+		self.shout ("BV = {bv} : V = {v}".format (bv = data['BV'], v = data ['V']), good = good)

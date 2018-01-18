@@ -13,6 +13,11 @@ class Strategy (misc.BPA):
 		self.seeker.setParams (params)
 		self.risky.setParams  (params)
 
+	def setShoutFunc (self, func):
+		misc.BPA.setShoutFunc (self, func)
+		self.seeker.setShoutFunc (func)
+		self.risky.setShoutFunc (func)
+
 	def CallBack (self, data):
 		new_data = data.copy ()
 		turn = False

@@ -1,12 +1,34 @@
-import term
+import curses
+from threading import Lock, Event 
 
-def clearscreen ():
-	term.clear ()
+class ConsoleScreen(object):
 
-def pprint (s, pos = None):
-	if pos == 'home':
-		term.homePos ()
-	elif type (pos) == tuple:
-		term.pos (pos[0], pos[1])
+	def __init__ (self):
+		self.screen = None
+		self.clsLock = Lock ()
+		self._execThread = None
+		self._Stop = Event ()
+		self.enabled = False
 
-	term.writeLine (s)
+	def __del__ (self):
+		if self.screen is not None:
+			self.end ()
+
+	def start (self):
+		self.screen = curses.initscr ()
+		curses.noecho ()
+		curses.cbreak ()
+		self.screen.keypad (True)
+
+		self.enabled = False
+
+	def end (self):
+		self.enabled = False
+
+		self._Stop.set ()
+		self.screen.keypad (False)
+		curses.nocbreak ()
+		curses.echo ()
+		curses.endwin ()
+
+

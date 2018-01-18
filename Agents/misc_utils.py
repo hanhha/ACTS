@@ -38,13 +38,19 @@ class BPA (object): # Base Processing Agent
 
 	def setParams (self, params):
 		self._params = params.copy ()
-		if 'print_func' in self._params.keys():
-			self._print_func = self._params['print_func']
+		if 'shout_func' in self._params.keys():
+			self._print_func = self._params['shout_func']
+	
+	def setShoutFunc (self, func):
+		self._print_func = func
 
-	def shout (self, text):
+	def shout (self, text, **kwargs):
 		if self._print_func is not None:
 			_text = repr(text) if type(text) is not str else text
-			self._print_func (_text)
+			try:
+				self._print_func (_text, **kwargs)
+			except (AttributeError, TypeError):
+				print (_text)
 		else:
 			print (text)
 
