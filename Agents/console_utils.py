@@ -20,12 +20,13 @@ class ConsoleScreen(object):
 		curses.cbreak ()
 		self.screen.keypad (True)
 
-		self.enabled = False
+		self._Stop.clear ()
 
 	def end (self):
-		self.enabled = False
-
+		self.clsLock.acquire ()
 		self._Stop.set ()
+		self.clsLock.release ()
+
 		self.screen.keypad (False)
 		curses.nocbreak ()
 		curses.echo ()

@@ -43,7 +43,7 @@ class Monitor (misc.BPA):
 
 				self._Stop.set()
 
-			self._execThread = Thread (target = monitor)
+			self._execThread = Thread (name = "monitor", target = monitor)
 			self._execThread.daemon = True
 			self._execThread.start () 
 

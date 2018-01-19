@@ -13,13 +13,15 @@ from pandas import DataFrame
 
 from threading import Thread
 
-sources = dict()
-plots   = OrderedDict ()
-glyphs  = dict ()
+sources          = dict()
+plots            = OrderedDict ()
+glyphs           = dict ()
+additional_tools = dict ()
+renderers        = dict ()
 
-new_data = dict ()
+new_data         = dict ()
 
-title = ''
+title         = ''
 
 in_cb_process = False
 
@@ -35,6 +37,16 @@ def add_glyph ( plot_key, glyph_key, glyph, column_dict):
 
 	sources  [plot_key][glyph_key] = ColumnDataSource(column_dict)
 	glyphs   [plot_key][glyph_key] = glyph
+
+def add_tool ( plot_key, glyph_key, tool):
+	global additional_tools
+	if plot_key not in additional_tools.keys():
+		additional_tools[plot_key] = {glyph_key : tool}
+	else:
+		if glyph_key in additional_tools[plot_key].keys():
+			additional_tools[plot_key][glyph_key].append (tool)
+		else:
+			additional_tools[plot_key][glyph_key] = [tool]
 
 @gen.coroutine
 def update_data ():
@@ -68,22 +80,41 @@ def CallBack ( data):
 					new_data[kp][kg][k].append(v)
 
 def modify_document (doc):
-	global plots, glyphs, sources, in_cb_process
+	global plots, glyphs, sources, in_cb_process, additional_tools, renderers
 
 	for k, plot in plots.items():
-		fig = plot () 
+		fig = plot ()
+		renderers [k] = dict ()
 
 		for gk, gv in glyphs[k].items():
 			tmp_dict = sources[k][gk].to_df().to_dict(orient='list')
 			sources[k][gk] = ColumnDataSource(tmp_dict)
 
 			glyph = gv ()
-			if type(glyph) is tuple:
-				for g in glyph:
-					fig.add_glyph (sources[k][gk], g)
-			else:
-				fig.add_glyph (sources[k][gk], glyph)
 
+			if type(glyph) is tuple:
+				tmp = None
+				for g in glyph:
+					tmp = fig.add_glyph (sources[k][gk], g)
+
+				renderers [k][gk] = tmp # last ride of the day
+
+			else:
+				tmp = fig.add_glyph (sources[k][gk], glyph)
+				renderers [k][gk] = tmp # last ride of the day
+
+			if k in additional_tools.keys():
+				if gk in additional_tools[k].keys():
+					tool = additional_tools[k][gk]
+					if type(tool) is not list:
+						tool.renderers = [renderers [k][gk]]
+						fig.add_tools (tool)
+
+					else:
+						for t in tool:
+							t.renderers = [renderers [k][gk]]
+							fig.add_tools (t)
+				
 		doc.add_root (fig)
 
 	doc.title = title 
@@ -92,39 +123,21 @@ def modify_document (doc):
 	in_cb_process = False
 
 port = 8888
-allow_websocket_origin = ['localhost:8888']
+allow_websocket_origin = ['localhost:8888', 'enco.hopto.org:8888']
 
 app = {'/analyzing': Application(FunctionHandler(modify_document))}
 
-io_loop = ioloop.IOLoop.instance ()
-autoreload.start (io_loop)
-
-server = Server (app, port = port, io_loop = io_loop, allow_websocket_origin = allow_websocket_origin)
-server.start ()
+server = None
 
 def start ():
-	pass
+	global server, io_loop, allow_websocket_origin, port, app
 
-def io_start (io_loop):
-	io_loop.start ()
+	server = Server (app, port = port, allow_websocket_origin = allow_websocket_origin)
+	server.start ()
+	t = Thread (name = "bokeh_chart", target = server.io_loop.start)
+	t.daemon = True
+	t.start ()
 
 def stop ():
-	global io_loop
-	io_loop.stop ()
-
-t = Thread (target = io_start, args = (io_loop,))
-t.start ()
-
-#def start ():
-#	from bokeh.client import push_session
-#
-#	doc = curdoc ()
-#	modify_document (doc)
-#	session = push_session (document = doc)
-#	session.show ()
-#	t = Thread (target = session.loop_until_closed)
-#	t.daemon = True
-#	t.start ()
-#
-#def stop ():
-#	pass
+	global server
+	server.io_loop.stop ()

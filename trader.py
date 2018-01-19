@@ -1,12 +1,8 @@
 #!/usr/bin/env python3
+
+from argparse import ArgumentParser
+
 from time import time, sleep
-from math import pi
-
-from bokeh.plotting import figure
-from bokeh.models.glyphs import VBar, Segment
-from bokeh.models.markers import Triangle 
-
-from curses import wrapper
 
 from Agents           import misc_utils as misc
 from Agents.monitor   import Monitor as Mon
@@ -14,12 +10,10 @@ from Agents.evaluator import (ProfitEvaluator, PredictEvaluator)
 from Agents.strategy  import Strategy
 from Agents.performer import Performer as Perf
 from Agents.risk_mgnt import RiskMgnt as Risk
-
-from Agents           import chart_utils as chart
 from Agents           import user_interface as ui
-
 from Agents.console_utils import *
 
+import trader_visual_to_bokeh as vb
 import trader_cfg as cfg
 
 class Trader (misc.BPA):
@@ -61,119 +55,35 @@ class Trader (misc.BPA):
 		self.predict_eva.save ('predict_{mar}.json'.format(mar = cfg.configuration['market']))
 		self.profit_eva.save ('profit_{mar}.json'.format(mar = cfg.configuration['market']))
 
-def get_figure ():
-	p = figure(x_axis_type = 'datetime', sizing_mode = 'scale_width', plot_height = 200)
-	p.xaxis.major_label_orientation = pi/4
-	p.grid.grid_line_alpha = 0.6
-
-	return p
-
-def draw_up_candles ():
-	g0 = Segment (x0 = 'T', y0 = 'H', x1 = 'T', y1 = 'L', line_color = 'black')
-	g1 = VBar    (x = 'T', top = 'C', bottom = 'O', width = 250000, fill_color = 'green', line_color = 'black')
-	
-	return (g0, g1)
-
-def draw_down_candles ():
-	g0 = Segment (x0 = 'T', y0 = 'H', x1 = 'T', y1 = 'L', line_color = 'black')
-	g1 = VBar    (x = 'T', top = 'O', bottom = 'C', width = 250000, fill_color = 'red', line_color = 'black')
-	
-	return (g0, g1) 
-
-def draw_stand_candles ():
-	g0 = Segment (x0 = 'T', y0 = 'H', x1 = 'T', y1 = 'L', line_color = 'black')
-	g1 = VBar    (x = 'T', top = 'O', bottom = 'C', width = 250000, fill_color = 'black', line_color = 'black')
-	
-	return (g0, g1) 
-
-def draw_sell ():
-	g0 = Triangle (x = 'T', y = 'price', size = 10, fill_color = 'red', angle = pi, fill_alpha = 0.8)
-
-	return g0 
-
-def draw_buy ():
-	g0 = Triangle (x = 'T', y = 'price', size = 10, fill_color = 'green', angle = 0.0, fill_alpha = 0.8)
-
-	return g0 
-
-class DataCvt(misc.BPA):
-	def CallBack (self, data):
-		new_data = {'candlestick':{}}
-
-		if data['C'] > data['O']:
-			new_data['candlestick']['upstick'] = {
-					 'L': data['L'],
-					 'H': data['H'],
-					 'C': data['C'],
-					 'O': data['O'],
-					 'T': data['T']
-				}
-		elif data['C'] < data['O']:
-			new_data['candlestick']['downstick'] = {
-					 'L': data['L'],
-					 'H': data['H'],
-					 'C': data['C'],
-					 'O': data['O'],
-					 'T': data['T']
-				}
-		else:
-			new_data['candlestick']['standstick'] = {
-					 'L': data['L'],
-					 'H': data['H'],
-					 'C': data['C'],
-					 'O': data['O'],
-					 'T': data['T']
-				}
-
-		if data['D'] == True:
-			new_data['candlestick']['buy_decision'] = {
-					 'price': data['L'],
-					 'T': data['T']
-				}
-		elif data['D'] == False:
-			new_data['candlestick']['sell_decision'] = {
-					 'price': data['H'],
-					 'T': data['T']
-				}
-
-		self.BroadCast (new_data)
-
+parser = ArgumentParser()
+parser.add_argument ('-n', '--no_curses', action = 'store_true', default = False, help = 'Not using curses to render UI')
+args = parser.parse_args ()
 
 trader = Trader (source = None, params = cfg.configuration, agent_params = cfg.strategy_agents) 
 
-cvt = DataCvt()
-
-chart.allow_websocket_origin.append("enco.hopto.org:8888")
-chart.add_plot ('candlestick', get_figure)
-chart.add_glyph ('candlestick', 'upstick', draw_up_candles, {'T':[],'H':[],'L':[],'O':[],'C':[]})
-chart.add_glyph ('candlestick', 'downstick', draw_down_candles, {'T':[],'H':[],'L':[],'O':[],'C':[]})
-chart.add_glyph ('candlestick', 'standstick', draw_stand_candles, {'T':[],'H':[],'L':[],'O':[],'C':[]})
-chart.add_glyph ('candlestick', 'buy_decision', draw_buy, {'T':[],'price':[]})
-chart.add_glyph ('candlestick', 'sell_decision', draw_sell, {'T':[],'price':[]})
-
-trader.predict_eva.BindTo (cvt.CallBack)
-cvt.BindTo (chart.CallBack)
+trader.predict_eva.BindTo (vb.cvt.CallBack)
 
 trading_ui = ui.UserInterface ("Auto Crypto Trading System")
-trader.setShoutFunc (trading_ui.printCur)
-trader.profit_eva.setShoutFunc (trading_ui.printEva)
-trader.monitor.setShoutFunc (trading_ui.printCur)
-trader.strategy.setShoutFunc  (trading_ui.printCur)
 
+trader.setShoutFunc            (trading_ui.printCur)
+trader.profit_eva.setShoutFunc (trading_ui.printEva)
+trader.monitor.setShoutFunc    (trading_ui.printCur)
+trader.strategy.setShoutFunc   (trading_ui.printCur)
 
 def main (stdscr):
-	trading_ui.start ()
-	chart.start ()
+	if not args.no_curses:
+		trading_ui.start ()
+	vb.chart.start ()
 
 	trading_ui.printTip ("Showing time is GMT0 to match with returned data from exchange ...")
-	trading_ui.printTip ("Charts shows at <hostname>:8888/analyze ...")
+	trading_ui.printTip ("Charts shows at <hostname>:8888/analyzing ...")
 	trading_ui.printTip ("Press Ctrl-C or Ctrl-Break (Windows) to stop ...")
 
 	trader.start ()
-
 	trader.idle  ()
 
-	trading_ui.end ()
+	if not args.no_curses:
+		trading_ui.end ()
 
 if __name__ == "__main__":
 	print ('Auto Crypto Trading System')
@@ -211,7 +121,6 @@ if __name__ == "__main__":
 				print ('Smart choice right now.')
 				quit ()
 
-	#wrapper (main)
 	main (0)
 
 	print ('\n' + 'Finish.')
@@ -245,6 +154,4 @@ if __name__ == "__main__":
 	while ans != 'quit':
 		ans = input ("Type \'quit\' to exit: ")
 	
-	chart.stop ()
-
 	exit (0)
