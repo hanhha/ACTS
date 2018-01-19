@@ -73,39 +73,25 @@ class PredictEvaluator (Evaluator):
 	def record (self, data):
 		self.add_data (data)
 		self.evaluate ()
-		
-		# Broadcast plotting data
-		if data['act'][0] == 'buy':
-			decision = True
-		elif data['act'][0] == 'sell':
-			decision = False
-		else:
-			decision = None
 
-		plot_data = {'T': data['T'],
-					 'L': data['L'],
-					 'H': data['H'],
-					 'C': data['C'],
-					 'O': data['O'],
-					 'D': decision} 
+		self.BroadCast (data)	
 
-		self.BroadCast (plot_data)	
-	
 	def add_data (self, data):
 		new_data = data.copy ()
 		self.archieve.append (data.copy())
 
 		new_data ['buy_decision'] = None
-		if new_data ['act'][0] == 'buy':
-			new_data ['buy_decision'] = True
-		elif new_data ['act'][0] == 'sell':
+		if 'act' in new_data.keys():
+			new_data ['buy_decision'] = new_data['act'][0] == 'buy'
+		else:
 			new_data ['buy_decision'] = False
 
 		self.pdarchieve = self.pdarchieve.append (new_data, ignore_index = True)
 
 	def visualize (self):
-		fig = chart.draw_candlesticks (self.pdarchieve, 'H','C','O','L','T', name = 'CandleSticks with buy/sell decisions', decision = 'buy_decision')
-		return fig
+		Evaluator.visualize (self)
+		#fig = chart.draw_candlesticks (self.pdarchieve, 'H','C','O','L','T', name = 'CandleSticks with buy/sell decisions', decision = 'buy_decision')
+		#return fig
 
 	def evaluate (self):
 		# TODO: need to improve

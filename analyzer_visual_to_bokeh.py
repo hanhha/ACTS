@@ -94,12 +94,12 @@ class DataCvt(misc.BPA):
 					 'T': data['T']
 				}
 
-		if data['D'] == True:
+		if data['profitable'] == True:
 			new_data['candlestick']['buy_decision'] = {
 					 'price': data['L'],
 					 'T': data['T']
 				}
-		elif data['D'] == False:
+		if data['harvestable'] == True:
 			new_data['candlestick']['sell_decision'] = {
 					 'price': data['H'],
 					 'T': data['T']

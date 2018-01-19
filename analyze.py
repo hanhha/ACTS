@@ -69,8 +69,8 @@ def main (stdscr):
 	trading_ui.printTip ("Charts shows at <hostname>:8888/analyzing ...")
 	trading_ui.printTip ("Press Ctrl-C or Ctrl-Break (Windows) to stop ...")
 
-	trader.start ()
-	trader.idle  ()
+	analyzer.start ()
+	analyzer.idle  ()
 
 	if not args.no_curses:
 		trading_ui.end ()
