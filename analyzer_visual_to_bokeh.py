@@ -108,8 +108,8 @@ class DataCvt(misc.BPA):
 		self.BroadCast (new_data)
 
 cvt = DataCvt()
+cvt.BindTo (chart.CallBack)
 
-chart.allow_websocket_origin.append("enco.hopto.org:8888")
 chart.add_plot ('candlestick', get_figure)
 
 chart.add_glyph ('candlestick', 'upstick',       draw_up_candles,    {'T':[],'H':[],'L':[],'O':[],'C':[]})
@@ -122,4 +122,3 @@ chart.add_tool ('candlestick', 'upstick',   get_hover())
 chart.add_tool ('candlestick', 'downstick', get_hover())
 chart.add_tool ('candlestick', 'downstick', get_hover())
 
-cvt.BindTo (chart.CallBack)

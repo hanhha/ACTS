@@ -21,9 +21,13 @@ renderers        = dict ()
 
 new_data         = dict ()
 
-title         = ''
+title            = ''
 
-in_cb_process = False
+in_cb_process    = False
+
+port = 8886 
+allow_websocket_origin = ['localhost:8886']
+
 
 def add_plot ( plot_key, plot):
 	global sources, plots, glyphs
@@ -121,9 +125,6 @@ def modify_document (doc):
 	doc.add_periodic_callback (update_data, 1000)
 
 	in_cb_process = False
-
-port = 8888
-allow_websocket_origin = ['localhost:8888', 'enco.hopto.org:8888']
 
 app = {'/analyzing': Application(FunctionHandler(modify_document))}
 

@@ -4,17 +4,20 @@ from argparse import ArgumentParser
 
 from time import time, sleep
 
-from Agents           import misc_utils as misc
-from Agents.monitor   import Monitor as Mon
-from Agents.evaluator import (ProfitEvaluator, PredictEvaluator) 
-from Agents.strategy  import Strategy
-from Agents.performer import Performer as Perf
-from Agents.risk_mgnt import RiskMgnt as Risk
-from Agents           import user_interface as ui
+from Agents.evaluator     import (ProfitEvaluator, PredictEvaluator) 
+from Agents               import misc_utils     as misc
+from Agents.monitor       import Monitor        as Mon
+from Agents.strategy      import Strategy
+from Agents.performer     import Performer      as Perf
+from Agents.risk_mgnt     import RiskMgnt       as Risk
+from Agents               import user_interface as ui
 from Agents.console_utils import *
 
-import trader_visual_to_bokeh as vb
-import trader_cfg as cfg
+from Agents               import acts_config    as s_cfg
+import trader_cfg                               as cfg
+
+if s_cfg.bokeh_en:
+	import trader_visual_to_bokeh               as vb
 
 parser = ArgumentParser()
 parser.add_argument ('-n', '--no_curses', action = 'store_true', default = False, help = 'Not using curses to render UI')
@@ -64,7 +67,8 @@ class Trader (misc.BPA):
 
 trader = Trader (source = None, params = cfg.configuration, agent_params = cfg.strategy_agents) 
 
-trader.predict_eva.BindTo (vb.cvt.CallBack)
+if s_cfg.bokeh_en:
+	trader.predict_eva.BindTo (vb.cvt.CallBack)
 
 trading_ui = ui.UserInterface ("Auto Crypto Trading System")
 
@@ -76,7 +80,6 @@ trader.strategy.setShoutFunc   (trading_ui.printCur)
 def main (stdscr):
 	if not args.no_curses:
 		trading_ui.start ()
-	vb.chart.start ()
 
 	trading_ui.printTip ("Showing time is GMT0 to match with returned data from exchange ...")
 	trading_ui.printTip ("Charts shows at <hostname>:8888/analyzing ...")
@@ -123,6 +126,14 @@ if __name__ == "__main__":
 			else:
 				print ('Smart choice right now.')
 				quit ()
+
+	if s_cfg.bokeh_en:
+		print (s_cfg.config ['Bokeh']['allowed_origins'])	
+		list_origins = list(filter(lambda s: s != '', list(map (lambda x:x.strip(), [o for o in s_cfg.config['Bokeh']['allowed_origins'].split (',')]))))
+
+		vb.chart.allow_websocket_origin = list_origins
+		vb.chart.port                   = int(s_cfg.config ['Bokeh']['port'])
+		vb.chart.start ()
 
 	main (0)
 

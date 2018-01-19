@@ -4,15 +4,18 @@ from argparse import ArgumentParser
 
 from time import time, sleep
 
-from Agents           import misc_utils as misc
-from Agents.monitor   import Monitor as Mon
-from Agents.evaluator import PredictEvaluator 
-from Agents.tanalyzer import TAnalyzer
-from Agents           import user_interface as ui
+from Agents.evaluator     import PredictEvaluator 
+from Agents.tanalyzer     import TAnalyzer
 from Agents.console_utils import *
+from Agents		          import misc_utils     as misc
+from Agents.monitor       import Monitor        as Mon
+from Agents               import user_interface as ui
 
-import analyzer_visual_to_bokeh as vb
-import trader_cfg as cfg
+from Agents               import acts_config    as s_cfg
+import trader_cfg                               as cfg
+
+if s_cfg.bokeh_en:
+	import analyzer_visual_to_bokeh             as vb
 
 parser = ArgumentParser()
 parser.add_argument ('-n', '--no_curses', action = 'store_true', default = False, help = 'Not using curses to render UI')
@@ -66,7 +69,6 @@ analyzer.analyzer.setShoutFunc (trading_ui.printCur)
 def main (stdscr):
 	if not args.no_curses:
 		trading_ui.start ()
-	vb.chart.start ()
 
 	trading_ui.printTip ("Showing time is GMT0 to match with returned data from exchange ...")
 	trading_ui.printTip ("Charts shows at <hostname>:8888/analyzing ...")
@@ -79,6 +81,14 @@ def main (stdscr):
 		trading_ui.end ()
 
 if __name__ == "__main__":
+	if s_cfg.bokeh_en:
+		print (s_cfg.config ['Bokeh']['allowed_origins'])	
+		list_origins = list(filter(lambda s: s != '', list(map (lambda x:x.strip(), [o for o in s_cfg.config['Bokeh']['allowed_origins'].split (',')]))))
+
+		vb.chart.allow_websocket_origin = list_origins
+		vb.chart.port                   = int(s_cfg.config ['Bokeh']['port'])
+		vb.chart.start ()
+
 	main (0)
 
 	print ('\n' + 'Finish.')

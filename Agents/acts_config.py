@@ -31,3 +31,5 @@ else:
 		config.read ('acts_config.ini')
 
 telegram_en = True if 'Telegram' in config.keys() else False
+
+bokeh_en = True if 'Bokeh' in config.keys() else False
