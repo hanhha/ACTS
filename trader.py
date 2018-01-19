@@ -141,20 +141,18 @@ class DataCvt(misc.BPA):
 
 trader = Trader (source = None, params = cfg.configuration, agent_params = cfg.strategy_agents) 
 
-plotting = chart.PlottingServer (title = 'Auto Crypto Trading System for market {mar}'.format (mar = cfg.configuration['market']), port = 8888, allow_websocket_origin = ['localhost:8888','enco.hopto.org:8888'])
-
 cvt = DataCvt()
 
-plotting.add_plot ('candlestick', get_figure)
-
-plotting.add_glyph ('candlestick', 'upstick', draw_up_candles, {'T':[],'H':[],'L':[],'O':[],'C':[]})
-plotting.add_glyph ('candlestick', 'downstick', draw_down_candles, {'T':[],'H':[],'L':[],'O':[],'C':[]})
-plotting.add_glyph ('candlestick', 'standstick', draw_stand_candles, {'T':[],'H':[],'L':[],'O':[],'C':[]})
-plotting.add_glyph ('candlestick', 'buy_decision', draw_buy, {'T':[],'price':[]})
-plotting.add_glyph ('candlestick', 'sell_decision', draw_sell, {'T':[],'price':[]})
+chart.allow_websocket_origin.append("enco.hopto.org:8888")
+chart.add_plot ('candlestick', get_figure)
+chart.add_glyph ('candlestick', 'upstick', draw_up_candles, {'T':[],'H':[],'L':[],'O':[],'C':[]})
+chart.add_glyph ('candlestick', 'downstick', draw_down_candles, {'T':[],'H':[],'L':[],'O':[],'C':[]})
+chart.add_glyph ('candlestick', 'standstick', draw_stand_candles, {'T':[],'H':[],'L':[],'O':[],'C':[]})
+chart.add_glyph ('candlestick', 'buy_decision', draw_buy, {'T':[],'price':[]})
+chart.add_glyph ('candlestick', 'sell_decision', draw_sell, {'T':[],'price':[]})
 
 trader.predict_eva.BindTo (cvt.CallBack)
-cvt.BindTo (plotting.CallBack)
+cvt.BindTo (chart.CallBack)
 
 trading_ui = ui.UserInterface ("Auto Crypto Trading System")
 trader.setShoutFunc (trading_ui.printCur)
@@ -162,9 +160,10 @@ trader.profit_eva.setShoutFunc (trading_ui.printEva)
 trader.monitor.setShoutFunc (trading_ui.printCur)
 trader.strategy.setShoutFunc  (trading_ui.printCur)
 
+
 def main (stdscr):
-	plotting.idle ()
-	#trading_ui.start ()
+	trading_ui.start ()
+	chart.start ()
 
 	trading_ui.printTip ("Showing time is GMT0 to match with returned data from exchange ...")
 	trading_ui.printTip ("Charts shows at <hostname>:8888/analyze ...")
@@ -174,7 +173,7 @@ def main (stdscr):
 
 	trader.idle  ()
 
-	#trading_ui.end ()
+	trading_ui.end ()
 
 if __name__ == "__main__":
 	print ('Auto Crypto Trading System')
@@ -246,5 +245,6 @@ if __name__ == "__main__":
 	while ans != 'quit':
 		ans = input ("Type \'quit\' to exit: ")
 	
-	plotting.stop ()
+	chart.stop ()
+
 	exit (0)
