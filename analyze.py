@@ -14,6 +14,12 @@ from Agents.console_utils import *
 import analyzer_visual_to_bokeh as vb
 import trader_cfg as cfg
 
+parser = ArgumentParser()
+parser.add_argument ('-n', '--no_curses', action = 'store_true', default = False, help = 'Not using curses to render UI')
+parser.add_argument ('-s', '--save', action = 'store_true', default = False, help = 'Save predictions and transactions to JSON files')
+args = parser.parse_args ()
+
+
 class Analyzer (misc.BPA):
 	def __init__ (self, source, params, agent_params):
 		misc.BPA.__init__ (self, source, params)
@@ -44,11 +50,8 @@ class Analyzer (misc.BPA):
 
 		self.monitor.stop ()	
 
-		self.predict_eva.save ('predict_{mar}.json'.format(mar = cfg.configuration['market']))
-
-parser = ArgumentParser()
-parser.add_argument ('-n', '--no_curses', action = 'store_true', default = False, help = 'Not using curses to render UI')
-args = parser.parse_args ()
+		if args.save:
+			self.predict_eva.save ('predict_{mar}.json'.format(mar = cfg.configuration['market']))
 
 analyzer = Analyzer (source = None, params = cfg.configuration, agent_params = cfg.strategy_agents) 
 
