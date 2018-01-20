@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from threading import Thread, Event
-from time import sleep
+import timeit
 from . import misc_utils as misc
 from . import exchange as exch
 
@@ -48,6 +48,7 @@ class Monitor (misc.BPA):
 			self._execThread.start () 
 
 	def start (self):
+		start_time = timeit.default_timer ()
 		resc, ticks = exch.get_candle_ticks (self._market, self._candle, False)
 		if not resc:
 			self.shout ('Can not get history from exchange for initial data, please check')
@@ -58,8 +59,12 @@ class Monitor (misc.BPA):
 			self.shout ('Fetched market history from exchange for initial data ...')
 
 		self._Stop.clear ()
+		elapsed = timeit.default_timer() - start_time
+		self._Stop.wait (self._interval - elapsed)
+
 		def monitor ():
 			while not self._Stop.is_set ():
+				start_time = timeit.default_timer ()
 				resc, ticks = exch.get_candle_ticks (self._market, self._candle, True)
 				rest, ticker = exch.get_ticker (self._market)
 				if resc and rest:
@@ -70,7 +75,8 @@ class Monitor (misc.BPA):
 					self.BroadCast (data)
 				else:
 					self.shout ('Can not get data from exchange for market {mar}, please check'.format (mar = self._market))
-				self._Stop.wait (self._interval)
+				elapsed = timeit.default_timer() - start_time
+				self._Stop.wait (self._interval - elapsed)
 			
 			self._Stop.set ()
 

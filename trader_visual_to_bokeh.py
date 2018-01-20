@@ -97,18 +97,24 @@ class DataCvt(misc.BPA):
 			new_data['candlestick']['upstick'] = {
 					 'C': data['C'],
 					 'O': data['O'],
+					 'H': data['H'],
+					 'L': data['L'],
 					 'T': data['T']
 				}
 		elif data['C'] < data['O']:
 			new_data['candlestick']['downstick'] = {
 					 'C': data['C'],
 					 'O': data['O'],
+					 'H': data['H'],
+					 'L': data['L'],
 					 'T': data['T']
 				}
 		else:
 			new_data['candlestick']['standstick'] = {
 					 'C': data['C'],
 					 'O': data['O'],
+					 'H': data['H'],
+					 'L': data['L'],
 					 'T': data['T']
 				}
 
@@ -126,8 +132,6 @@ class DataCvt(misc.BPA):
 		new_data['candlestick']['highlow'] = {
 				'T': data['T'],
 				'H': data['H'],
-				'C': data['C'],
-				'O': data['O'],
 				'L': data['L']
 			}
 
@@ -142,13 +146,15 @@ cvt.BindTo (chart.CallBack)
 
 chart.add_plot ('candlestick', get_figure_0)
 
-chart.add_tool ('candlestick', 'highlow',   get_candlestick_hover())
-chart.add_glyph ('candlestick', 'highlow',       draw_highlow_segment, {'T':[],'H':[],'C':[], 'O':[], 'L':[]})
-chart.add_glyph ('candlestick', 'upstick',       draw_up_candles,    {'T':[],'O':[],'C':[]})
-chart.add_glyph ('candlestick', 'downstick',     draw_down_candles,  {'T':[],'O':[],'C':[]})
-chart.add_glyph ('candlestick', 'standstick',    draw_stand_candles, {'T':[],'O':[],'C':[]})
+chart.add_glyph ('candlestick', 'highlow',       draw_highlow_segment, {'T':[],'H':[], 'L':[]})
+chart.add_glyph ('candlestick', 'upstick',       draw_up_candles,    {'T':[],'O':[],'C':[], 'H':[], 'L':[]})
+chart.add_glyph ('candlestick', 'downstick',     draw_down_candles,  {'T':[],'O':[],'C':[], 'H':[], 'L':[]})
+chart.add_glyph ('candlestick', 'standstick',    draw_stand_candles, {'T':[],'O':[],'C':[], 'H':[], 'L':[]})
 chart.add_glyph ('candlestick', 'buy_decision',  draw_buy,           {'T':[],'L':[]})
 chart.add_glyph ('candlestick', 'sell_decision', draw_sell,          {'T':[],'H':[]})
+chart.add_tool ('candlestick', 'upstick',   get_candlestick_hover())
+chart.add_tool ('candlestick', 'downstick',   get_candlestick_hover())
+chart.add_tool ('candlestick', 'standstick',   get_candlestick_hover())
 
 chart.add_plot ('rsi6', get_figure_1)
 chart.add_plot ('pvt', get_figure_1)
