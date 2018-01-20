@@ -18,16 +18,18 @@ class Strategy (misc.BPA):
 		self.seeker.setShoutFunc (func)
 		self.risky.setShoutFunc (func)
 
+	def performed_well (self, data):
+		self.is_idle = not self.is_idle if data == True else self.is_idle
+
 	def CallBack (self, data):
 		new_data = data.copy ()
 		turn = False
 		act = [None]
 		predict = 'rising'
-		
+
 		if self.is_idle:
 			predict, profitable = self.seek_oppoturnity (data)
 			act = ['buy', data ['T']] if profitable else [None]
-			turn = act [0] == 'buy'
 
 		else:
 			risk, goal_achieved, predict, harvestable = self.check_harvestable (data)
@@ -36,14 +38,13 @@ class Strategy (misc.BPA):
 				act = ['sell', data ['T']]# if predict == 'falling' or predict == 'peak' else [None]
 			else:
 				act = ['sell', data ['T']] if harvestable else [None]
-			turn = act [0] == 'sell'
-				
+
 		new_data ['act'] = act
 		new_data ['predict'] = predict 	 
+		new_data ['calculations'] = self.seeker.last_calculations_ans.copy ()
 		self.BroadCast (new_data)
 
-		self.is_idle = not self.is_idle if turn else self.is_idle
-				
+
 	def seek_oppoturnity (self, data):
 		predict_trend      = self.seeker.predict ('trend', data)
 		predict_profitable = self.seeker.predict ('profitable', data)

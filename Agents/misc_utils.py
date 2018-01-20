@@ -30,11 +30,13 @@ class BPA (object): # Base Processing Agent
 		if len(params) > 0:
 			self.setParams (params)
 		self._observer = list ()
+		self._bkdr_observer = list ()
 		self._print_func = None
 
 	def Bind (self, source):
 		self._source = source
 		self._source.BindTo (self.CallBack)
+		self._source.BkdrBindTo (self.BkdrCallBack)
 
 	def setParams (self, params):
 		self._params = params.copy ()
@@ -54,6 +56,9 @@ class BPA (object): # Base Processing Agent
 		else:
 			print (text)
 
+	def BkdrCallBack (self, data):
+		pass
+
 	def CallBack (self, data):
 		self.shout (data)
 
@@ -61,5 +66,21 @@ class BPA (object): # Base Processing Agent
 		for cb in self._observer:
 			cb (data)
 
+	def BroadCastPush (self, data):
+		for cb in self._bkdr_observer:
+			cb (data)
+
 	def BindTo (self, cb):
 		self._observer.append (cb)
+
+	def BkdrBindTo (self, cb):
+		self._bkdr_observer.append (cb)
+
+	def setFeedback (self, fb):
+		self._feedback = fb
+
+	def Feedback (self, data):
+		if self._feedback is not None:
+			self._feedback (data)
+		else:
+			raise ValueError ("No feedback was set!")

@@ -49,6 +49,14 @@ class Monitor (misc.BPA):
 
 	def start (self):
 		resc, ticks = exch.get_candle_ticks (self._market, self._candle, False)
+		if not resc:
+			self.shout ('Can not get history from exchange for initial data, please check')
+		else:
+			# backdoor push to following blocks
+			for t in ticks:
+				self.BroadCastPush (t)
+			self.shout ('Fetched market history from exchange for initial data ...')
+
 		self._Stop.clear ()
 		def monitor ():
 			while not self._Stop.is_set ():

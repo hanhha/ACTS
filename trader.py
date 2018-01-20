@@ -38,6 +38,8 @@ class Trader (misc.BPA):
 
 		self.risk.Bind (self.performer)
 		self.strategy.seeker.Bind (self.performer)
+		self.monitor.BkdrBindTo (self.strategy.seeker.BkdrCallBack)
+		self.performer.setFeedback (self.strategy.performed_well)
 
 	def start (self):
 		self.shout ('Fetching history ...')
@@ -130,6 +132,8 @@ if __name__ == "__main__":
 	if s_cfg.bokeh_en:
 		print (s_cfg.config ['Bokeh']['allowed_origins'])	
 		list_origins = list(filter(lambda s: s != '', list(map (lambda x:x.strip(), [o for o in s_cfg.config['Bokeh']['allowed_origins'].split (',')]))))
+
+		vb.timeframe = trader._params['interval']
 
 		vb.chart.allow_websocket_origin = list_origins
 		vb.chart.port                   = int(s_cfg.config ['Bokeh']['port'])

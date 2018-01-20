@@ -14,6 +14,8 @@ class BaseSeeker (misc.BPA):
 		self._qty_bought = 0
 		self.studies = dict ()
 		self.prediction = dict ()
+		
+		self.last_calculations_ans = dict ()
 
 	def setParams (self, params):
 		misc.BPA.setParams (self, params)
@@ -69,6 +71,10 @@ class BaseSeeker (misc.BPA):
 		if data[0] == 'buy':
 			self._investment = data[2]['price'] + data[2]['fee']
 			self._qty_bought = data[2]['qty']
+
+	def BkdrCallBack (self, data):
+		if (self.archieve_len > 0 and data ['T'] != self.archieve [-1]['T']) or (self.archieve_len == 0):
+			self.store (data)
 
 	def printCandleStick (self, data):
 		good = data['C'] > data['O']

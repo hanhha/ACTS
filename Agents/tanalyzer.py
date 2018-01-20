@@ -21,6 +21,7 @@ class TAnalyzer (misc.BPA):
 
 		new_data ['profitable'] = profitable
 		new_data ['harvestable'] = harvestable
+		new_data ['calculations'] = self.seeker.last_calculations_ans.copy ()
 		self.BroadCast (new_data)
 
 	def seek_oppoturnity (self, data):

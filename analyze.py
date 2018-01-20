@@ -93,4 +93,8 @@ if __name__ == "__main__":
 
 	print ('\n' + 'Finish.')
 
+	ans = ''
+	while ans != 'quit':
+		ans = input ("Type \'quit\' to exit: ")
+
 	exit (0)

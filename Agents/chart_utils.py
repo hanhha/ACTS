@@ -5,6 +5,7 @@ from bokeh.application import Application
 from bokeh.application.handlers.function import FunctionHandler
 from bokeh.document import without_document_lock
 from bokeh.models import ColumnDataSource 
+from bokeh.layouts import  column 
 from bokeh.server.server import Server
 
 from tornado import gen, ioloop, autoreload
@@ -15,7 +16,7 @@ from threading import Thread
 
 sources          = dict()
 plots            = OrderedDict ()
-glyphs           = dict ()
+glyphs           = OrderedDict ()
 additional_tools = dict ()
 renderers        = dict ()
 
@@ -24,6 +25,8 @@ new_data         = dict ()
 title            = ''
 
 in_cb_process    = False
+
+plots_list = list ()
 
 port = 8886 
 allow_websocket_origin = ['localhost:8886']
@@ -64,7 +67,9 @@ def update_data ():
 
 		for kp, vp in new_plot_data.items():
 			for kg, vg in vp.items():
-				sources[kp][kg].stream (vg)
+				if kp in sources.keys():
+					if kg in sources[kp].keys():
+						sources[kp][kg].stream (vg)
 
 		in_cb_process = False
 
@@ -85,6 +90,9 @@ def CallBack ( data):
 
 def modify_document (doc):
 	global plots, glyphs, sources, in_cb_process, additional_tools, renderers
+	global plots_list
+
+	plots_list = list ()
 
 	for k, plot in plots.items():
 		fig = plot ()
@@ -118,8 +126,12 @@ def modify_document (doc):
 						for t in tool:
 							t.renderers = [renderers [k][gk]]
 							fig.add_tools (t)
-				
-		doc.add_root (fig)
+		if len(plots_list) > 0:
+			fig.x_range = plots_list[-1].x_range	
+
+		plots_list.append (fig)
+
+	doc.add_root (column(*plots_list, sizing_mode = 'scale_width'))
 
 	doc.title = title 
 	doc.add_periodic_callback (update_data, 1000)
