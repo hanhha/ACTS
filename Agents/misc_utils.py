@@ -1,5 +1,4 @@
 #/usr/bin/env python3
-import matplotlib.pyplot as plt
 from datetime import datetime
 from functools import singledispatch
 
