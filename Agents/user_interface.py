@@ -112,7 +112,7 @@ class UserInterface(cls.ConsoleScreen):
 
 	def print_on_window (self, window, *args, **kwargs):
 		if self.enabled:
-			window.addstr (*args, **kwargs)
+			window.addstr (*args)
 		else:
 			if (('verbose' in kwargs.keys()) and (self.verbose >=  kwargs['verbose'])) or ('verbose' not in kwargs.keys()):
 				for arg in args:

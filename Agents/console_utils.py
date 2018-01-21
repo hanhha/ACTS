@@ -41,7 +41,7 @@ class AWindow(object):
 		self.create (h, w, y, x, bkgd)
 
 		if initial_content is not None:
-			self.addstr (initial_content, **kwargs)
+			self.addstr (initial_content)
 
 	def create (self, h, w, y, x, bkgd):
 		self._win = curses.newwin (h, w, y, x)
@@ -61,17 +61,17 @@ class AWindow(object):
 	def win (self):
 		return self._win
 
-	def addstr (self, *args, **kwargs):
-		self._win.addstr (*args, **kwargs)
+	def addstr (self, *args):
+		self._win.addstr (*args)
 		self.refresh ()
-		self._archive.append ((args, kwargs))
+		self._archive.append (args)
 		if len(self._archive) > self._archive_limit:
 			del self._archive [0]
 
 	def restore (self):
 		self._win.clear ()
 		for archive in self._archive:
-			self._win.addstr (*archive[0], **archive[1])
+			self._win.addstr (*archive[0])
 			self.refresh ()
 
 		self.refresh ()
