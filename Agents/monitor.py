@@ -54,7 +54,7 @@ class Monitor (misc.BPA):
 			self.shout ('Can not get history from exchange for initial data, please check')
 		else:
 			# backdoor push to following blocks
-			for t in ticks:
+			for t in (ticks[-500:] if len(ticks) > 500 else ticks):
 				self.BroadCastPush (t)
 			self.shout ('Fetched market history from exchange for initial data ...')
 

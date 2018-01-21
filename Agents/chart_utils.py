@@ -12,7 +12,7 @@ from tornado import gen, ioloop, autoreload
 from collections import OrderedDict
 from pandas import DataFrame
 
-from threading import Thread
+from threading import Thread, Lock
 
 sources          = dict()
 plots            = OrderedDict ()
@@ -24,7 +24,7 @@ new_data         = dict ()
 
 title            = ''
 
-in_cb_process    = False
+cb_lock    = Lock () 
 
 plots_list = list ()
 
@@ -55,27 +55,37 @@ def add_tool ( plot_key, glyph_key, tool):
 		else:
 			additional_tools[plot_key][glyph_key] = [tool]
 
+new_data_lock = Lock ()
+
 @gen.coroutine
+def real_update_data ():
+	global new_data, sources, cb_lock
+	global new_data_lock
+
+	new_data_lock.acquire ()
+	new_plot_data = new_data.copy()
+	new_data = dict ()
+	new_data_lock.release ()
+
+	for kp, vp in new_plot_data.items():
+		for kg, vg in vp.items():
+			if kp in sources.keys():
+				if kg in sources[kp].keys():
+					sources[kp][kg].stream (vg, rollover = 288)
+	cb_lock.release ()
+
+@gen.coroutine
+@without_document_lock
 def update_data ():
-	global new_data, sources, in_cb_process
+	global cb_lock
 
-	if not in_cb_process:
-		in_cb_process = True
-
-		new_plot_data = new_data.copy()
-		new_data = dict ()
-
-		for kp, vp in new_plot_data.items():
-			for kg, vg in vp.items():
-				if kp in sources.keys():
-					if kg in sources[kp].keys():
-						sources[kp][kg].stream (vg)
-
-		in_cb_process = False
+	if cb_lock.acquire (False):
+		curdoc().add_next_tick_callback (real_update_data)
 
 def CallBack ( data):
-	global new_data
+	global new_data, new_data_lock
 
+	new_data_lock.acquire ()
 	for kp, vp in data.items():
 		for kg, vg in vp.items():
 			if kp not in new_data.keys():
@@ -87,13 +97,19 @@ def CallBack ( data):
 					new_data[kp][kg][k] = [v]
 				else:
 					new_data[kp][kg][k].append(v)
+	new_data_lock.release ()
 
 def modify_document (doc):
-	global plots, glyphs, sources, in_cb_process, additional_tools, renderers
+	global plots, glyphs, sources, cb_lock, additional_tools, renderers
 	global plots_list
 
-	plots_list = list ()
+	print (doc)
+	print (curdoc())
 
+	cb_lock.acquire ()
+
+	plots_list = list ()
+	
 	for k, plot in plots.items():
 		fig = plot ()
 		renderers [k] = dict ()
@@ -113,11 +129,12 @@ def modify_document (doc):
 
 			else:
 				tmp = fig.add_glyph (sources[k][gk], glyph)
-				renderers [k][gk] = tmp # last ride of the day
+				renderers [k][gk] = tmp 
 
 			if k in additional_tools.keys():
 				if gk in additional_tools[k].keys():
 					tool = additional_tools[k][gk]
+
 					if type(tool) is not list:
 						tool.renderers = [renderers [k][gk]]
 						fig.add_tools (tool)
@@ -136,7 +153,9 @@ def modify_document (doc):
 	doc.title = title 
 	doc.add_periodic_callback (update_data, 1000)
 
-	in_cb_process = False
+	cb_lock.release ()
+
+	return doc
 
 app = {'/analyzing': Application(FunctionHandler(modify_document))}
 

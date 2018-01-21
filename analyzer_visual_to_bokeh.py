@@ -6,6 +6,7 @@ from bokeh.plotting import figure
 from bokeh.models.glyphs import VBar, Segment, Line
 from bokeh.models.markers import Triangle 
 from bokeh.models import HoverTool, CrosshairTool
+from bokeh.models import Span
 
 import pandas as pd
 
@@ -20,7 +21,7 @@ def get_figure_0 ():
 
 	return p
 
-def get_figure_1 ():
+def get_figure_pvt ():
 	p = figure(x_axis_type = 'datetime', sizing_mode = 'scale_width', plot_height = 50)
 	p.add_tools(CrosshairTool())
 	p.xaxis.major_label_orientation = pi/4
@@ -28,24 +29,19 @@ def get_figure_1 ():
 
 	return p
 
-def get_candlestick_hover ():
-	hover = HoverTool (renderers = [],
-			tooltips = [
-				("T", "@T{%F}"),
-				("O", "@O"),
-				("C", "@C"),
-				("H", "@H"),
-				("L", "@L"),
-			],
+def get_figure_rsi ():
+	p = figure(x_axis_type = 'datetime', sizing_mode = 'scale_width', plot_height = 50)
+	p.add_tools(CrosshairTool())
+	p.xaxis.major_label_orientation = pi/4
+	p.grid.grid_line_alpha = 0.6
 
-			formatters = {
-				'T': 'datetime'
-			},
-			
-			mode = 'vline'
-	)
+	upper = Span (location = 30, dimension='width', line_color='black')
+	lower = Span (location = -30, dimension='width', line_color='black')
 
-	return hover
+	p.add_layout (upper)
+	p.add_layout (lower)
+
+	return p
 
 def draw_highlow_segment ():
 	g0 = Segment (x0 = 'T', y0 = 'H', x1 = 'T', y1 = 'L', line_color = 'black')
@@ -137,15 +133,14 @@ cvt.BindTo (chart.CallBack)
 
 chart.add_plot ('candlestick', get_figure_0)
 
-chart.add_tool ('candlestick', 'highlow',   get_candlestick_hover())
+chart.add_glyph ('candlestick', 'highlow',       draw_highlow_segment, {'T':[],'H':[],'C':[], 'O':[], 'L':[]})
 chart.add_glyph ('candlestick', 'upstick',       draw_up_candles,    {'T':[],'O':[],'C':[]})
 chart.add_glyph ('candlestick', 'downstick',     draw_down_candles,  {'T':[],'O':[],'C':[]})
 chart.add_glyph ('candlestick', 'standstick',    draw_stand_candles, {'T':[],'O':[],'C':[]})
-chart.add_glyph ('candlestick', 'highlow',       draw_highlow_segment, {'T':[],'H':[],'C':[], 'O':[], 'L':[]})
 chart.add_glyph ('candlestick', 'buy_decision',  draw_buy,           {'T':[],'L':[]})
-chart.add_glyph ('candlestick', 'sell_decision', draw_sell,          {'T':[],'H':[]})
+#chart.add_glyph ('candlestick', 'sell_decision', draw_sell,          {'T':[],'H':[]})
 
-chart.add_plot ('rsi6', get_figure_1)
-chart.add_plot ('pvt', get_figure_1)
+chart.add_plot ('rsi6', get_figure_rsi)
+chart.add_plot ('pvt', get_figure_pvt)
 chart.add_glyph ('rsi6', 'rsi6', draw_rsi6, {'T':[], 'val':[]})
 chart.add_glyph ('pvt', 'pvt', draw_pvt, {'T':[], 'val':[]})

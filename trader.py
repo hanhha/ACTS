@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-from argparse import ArgumentParser
-
 from time import time, sleep
 
 from Agents.evaluator     import (ProfitEvaluator, PredictEvaluator) 
@@ -18,11 +16,6 @@ import trader_cfg                               as cfg
 
 if s_cfg.bokeh_en:
 	import trader_visual_to_bokeh               as vb
-
-parser = ArgumentParser()
-parser.add_argument ('-n', '--no_curses', action = 'store_true', default = False, help = 'Not using curses to render UI')
-parser.add_argument ('-s', '--save', action = 'store_true', default = False, help = 'Save predictions and transactions to JSON files')
-args = parser.parse_args ()
 
 
 class Trader (misc.BPA):
@@ -63,7 +56,7 @@ class Trader (misc.BPA):
 
 		self.monitor.stop ()	
 
-		if args.save:
+		if cfg.cmd_args.save:
 			self.predict_eva.save ('predict_{mar}.json'.format(mar = cfg.configuration['market']))
 			self.profit_eva.save ('profit_{mar}.json'.format(mar = cfg.configuration['market']))
 
@@ -72,7 +65,7 @@ trader = Trader (source = None, params = cfg.configuration, agent_params = cfg.s
 if s_cfg.bokeh_en:
 	trader.predict_eva.BindTo (vb.cvt.CallBack)
 
-trading_ui = ui.UserInterface ("Auto Crypto Trading System")
+trading_ui = ui.UserInterface ("Auto Crypto Trading System", verbose = cfg.cmd_args.verbose)
 
 trader.setShoutFunc            (trading_ui.printCur)
 trader.profit_eva.setShoutFunc (trading_ui.printEva)
@@ -80,7 +73,7 @@ trader.monitor.setShoutFunc    (trading_ui.printCur)
 trader.strategy.setShoutFunc   (trading_ui.printCur)
 
 def main (stdscr):
-	if not args.no_curses:
+	if not cfg.cmd_args.no_curses:
 		trading_ui.start ()
 
 	trading_ui.printTip ("Showing time is GMT0 to match with returned data from exchange ...")
@@ -90,7 +83,7 @@ def main (stdscr):
 	trader.start ()
 	trader.idle  ()
 
-	if not args.no_curses:
+	if not cfg.cmd_args.no_curses:
 		trading_ui.end ()
 
 if __name__ == "__main__":

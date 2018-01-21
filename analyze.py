@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-from argparse import ArgumentParser
-
 from time import time, sleep
 
 from Agents.evaluator     import PredictEvaluator 
@@ -16,11 +14,6 @@ import trader_cfg                               as cfg
 
 if s_cfg.bokeh_en:
 	import analyzer_visual_to_bokeh             as vb
-
-parser = ArgumentParser()
-parser.add_argument ('-n', '--no_curses', action = 'store_true', default = False, help = 'Not using curses to render UI')
-parser.add_argument ('-s', '--save', action = 'store_true', default = False, help = 'Save predictions and transactions to JSON files')
-args = parser.parse_args ()
 
 
 class Analyzer (misc.BPA):
@@ -53,21 +46,21 @@ class Analyzer (misc.BPA):
 
 		self.monitor.stop ()	
 
-		if args.save:
+		if cfg.cmd_args.save:
 			self.predict_eva.save ('predict_{mar}.json'.format(mar = cfg.configuration['market']))
 
 analyzer = Analyzer (source = None, params = cfg.configuration, agent_params = cfg.strategy_agents) 
 
 analyzer.predict_eva.BindTo (vb.cvt.CallBack)
 
-trading_ui = ui.UserInterface ("Crypto Market Analyzer System")
+trading_ui = ui.UserInterface ("Crypto Market Analyzer System", verbose = cfg.cmd_args.verbose)
 
 analyzer.setShoutFunc          (trading_ui.printCur)
 analyzer.monitor.setShoutFunc  (trading_ui.printCur)
 analyzer.analyzer.setShoutFunc (trading_ui.printCur)
 
 def main (stdscr):
-	if not args.no_curses:
+	if not cfg.cmd_args.no_curses:
 		trading_ui.start ()
 
 	trading_ui.printTip ("Showing time is GMT0 to match with returned data from exchange ...")
@@ -77,7 +70,7 @@ def main (stdscr):
 	analyzer.start ()
 	analyzer.idle  ()
 
-	if not args.no_curses:
+	if not cfg.cmd_args.no_curses:
 		trading_ui.end ()
 
 if __name__ == "__main__":

@@ -7,13 +7,18 @@ from curses import wrapper, doupdate
 from threading import Thread, Event 
 
 try:
+	from . import misc_utils as misc
+except (SystemError, ImportError):
+	import misc_utils as misc 
+
+try:
 	from . import console_utils as cls
 except (SystemError, ImportError):
 	import console_utils as cls
 
 
 class UserInterface(cls.ConsoleScreen):
-	def __init__ (self, title):
+	def __init__ (self, title, **kwargs):
 		self.title  = title
 
 		self.tltWin = None
@@ -24,6 +29,7 @@ class UserInterface(cls.ConsoleScreen):
 		self.maxX = None 
 		self.maxY = None 
 
+		self.verbose = kwargs ['verbose'] if 'verbose' in kwargs.keys() else 2
 
 		cls.ConsoleScreen.__init__ (self)
 
@@ -108,24 +114,28 @@ class UserInterface(cls.ConsoleScreen):
 		if self.enabled:
 			window.addstr (*args, **kwargs)
 		else:
-			pass
+			if (('verbose' in kwargs.keys()) and (self.verbose >=  kwargs['verbose'])) or ('verbose' not in kwargs.keys()):
+				for arg in args:
+					if type(arg) is str:
+						print (arg)
+						break
 
 	def printEva (self, text, **kwargs):
 		if 'good' in kwargs.keys():
 			cp = 1 if kwargs['good'] else 2
-			self.print_on_window (self.evaWin, text + '\n', curses.color_pair(cp) if self.enabled else None)
+			self.print_on_window (self.evaWin, text + '\n', curses.color_pair(cp) if self.enabled else None, **kwargs)
 		else:
-			self.print_on_window (self.evaWin, text + '\n')
+			self.print_on_window (self.evaWin, text + '\n', **kwargs)
 
 	def printTip (self, text, **kwargs):
-		self.print_on_window (self.tipWin, text + '\n')
+		self.print_on_window (self.tipWin, text + '\n', **kwargs)
 
 	def printCur (self, text, **kwargs):
 		if 'good' in kwargs.keys():
 			cp = 1 if kwargs['good'] else 2
-			self.print_on_window (self.curWin, text + '\n', curses.color_pair(cp) if self.enabled else None)
+			self.print_on_window (self.curWin, text + '\n', curses.color_pair(cp) if self.enabled else None, **kwargs)
 		else:
-			self.print_on_window (self.curWin, text + '\n')
+			self.print_on_window (self.curWin, text + '\n', **kwargs)
 
 def main (stdscr):
 	ui = UserInterface ("Test")
