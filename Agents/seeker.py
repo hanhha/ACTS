@@ -5,9 +5,9 @@ from pandas import DataFrame
 class BaseSeeker (misc.BPA):
 	def __init__ (self, source, params):
 		misc.BPA.__init__ (self, source = source, params = params)
-		self.archieve = list ()
-		self.pdarchieve = DataFrame ()
-		self.archieve_len = 0
+		self.archive = list ()
+		self.pdarchive = DataFrame ()
+		self.archive_len = 0
 		if len(params) > 0:
 			self.setParams (params)
 		self._investment = 0
@@ -31,13 +31,13 @@ class BaseSeeker (misc.BPA):
 		return (gprice * self._qty_bought) > (self._investment*(1 + self._goal))  
 
 	def store (self, data):
-		self.archieve.append (data)
-		self.pdarchieve = self.pdarchieve.append (data, ignore_index = True)
-		self.archieve_len += 1
+		self.archive.append (data)
+		self.pdarchive = self.pdarchive.append (data, ignore_index = True)
+		self.archive_len += 1
 		self.prediction = dict ()
 	
 	def predict (self, factor, data):
-		if (self.archieve_len > 0 and data ['T'] != self.archieve [-1]['T']) or (self.archieve_len == 0):
+		if (self.archive_len > 0 and data ['T'] != self.archive [-1]['T']) or (self.archive_len == 0):
 			self.store (data)
 		
 		return self.call_predict (factor, data) if factor not in self.prediction.keys() else self.prediction [factor]
@@ -73,7 +73,7 @@ class BaseSeeker (misc.BPA):
 			self._qty_bought = data[2]['qty']
 
 	def BkdrCallBack (self, data):
-		if (self.archieve_len > 0 and data ['T'] != self.archieve [-1]['T']) or (self.archieve_len == 0):
+		if (self.archive_len > 0 and data ['T'] != self.archive [-1]['T']) or (self.archive_len == 0):
 			self.store (data)
 
 	def printCandleStick (self, data):

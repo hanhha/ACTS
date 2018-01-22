@@ -3,6 +3,7 @@
 import talib
 from talib import abstract
 import pandas as pd
+from copy import deepcopy
 
 CandleSticksPatternList = talib.get_function_groups()['Pattern Recognition']
 
@@ -10,7 +11,7 @@ def pandas_convert (dictdata):
 	return pd.DataFrame (dictdata)
 
 def scale_up (data, interest):
-	sample = data[interest] .max()
+	sample = data[interest].max()
 	if sample < 0.000001:
 		mul = 1000000
 	elif sample < 0.00001:
@@ -75,3 +76,39 @@ def pattern_recognize (data, op, cp, hp, lp):
 		ret_list.append({'name':pt, 'marks': func (inputs)})
 
 	return list(filter(lambda x: x['marks'][-1] != 0, ret_list))
+
+def candle_indicator (data):
+	c_body =(data['C'] + data['O'])/2
+	c_wick = (data['H'] + data['L'])/2
+
+	variant = (c_body - c_wick)/(data['H'] - c_wick)
+
+	if (variant > 0.4) and (data['C'] > data['O']):
+			return True
+	if (variant < -0.4) and (data['C'] < data['O']):
+			return False
+	return None
+
+def find_optima (datalist, lastest_noo = 2):
+	result_list = {'peak':[], 'canyon':[]}
+	idx = len(datalist)
+	nop, noc = 0, 0
+	cur, mid, nxt = None, None, None
+
+	while ((noc < lastest_noo) or (nop < lastest_noo)) and (idx > 0):
+		idx -= 1
+
+		nxt = mid
+		mid = cur
+		cur = datalist[idx]
+
+		if (nxt is not None) and (mid is not None):
+			if (mid >= cur) and (mid > nxt):
+				result_list['peak'].append (mid)
+				nop += 1
+
+			elif (mid < cur) and (mid <= nxt):
+				result_list['canyon'].append (mid)
+				noc += 1
+
+	return result_list

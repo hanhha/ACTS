@@ -136,7 +136,7 @@ if __name__ == "__main__":
 
 	print ('\n' + 'Finish.')
 
-	profit_data = trader.profit_eva.archieve
+	profit_data = trader.profit_eva.archive
 	if len(profit_data) > 0:
 		if len(profit_data [-1]) < 4:
 			del profit_data [-1]

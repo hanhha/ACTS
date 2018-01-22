@@ -48,11 +48,11 @@ class Strategy (misc.BPA):
 	def seek_oppoturnity (self, data):
 		predict_trend      = self.seeker.predict ('trend', data)
 		predict_profitable = self.seeker.predict ('profitable', data)
-		return (predict_trend, predict_profitable) 
+		return predict_trend, predict_profitable 
 
 	def check_harvestable (self, data):
 		risk                = self.risky.check_risk (data['Last'])
 		predict_trend       = self.seeker.predict ('trend', data)
 		predict_harvestable = self.seeker.predict ('harvestable', data)
 		goal_achieved       = self.seeker.predict ('hitgoal', data)
-		return (risk, goal_achieved, predict_trend, predict_harvestable)
+		return risk, goal_achieved, predict_trend, predict_harvestable

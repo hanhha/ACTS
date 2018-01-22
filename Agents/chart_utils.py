@@ -71,7 +71,7 @@ def real_update_data ():
 		for kg, vg in vp.items():
 			if kp in sources.keys():
 				if kg in sources[kp].keys():
-					sources[kp][kg].stream (vg, rollover = 288)
+					sources[kp][kg].stream (vg)#, rollover = 288)
 	cb_lock.release ()
 
 @gen.coroutine
@@ -102,9 +102,6 @@ def CallBack ( data):
 def modify_document (doc):
 	global plots, glyphs, sources, cb_lock, additional_tools, renderers
 	global plots_list
-
-	print (doc)
-	print (curdoc())
 
 	cb_lock.acquire ()
 

@@ -80,6 +80,10 @@ def draw_pvt ():
 	g0 = Line (x = 'T', y = 'val', line_color = 'blue')
 	return g0
 
+def draw_ema ():
+	g0 = Line (x = 'T', y = 'val', line_color = 'blue')
+	return g0
+
 class DataCvt(misc.BPA):
 	def CallBack (self, data):
 		new_data = {'candlestick':{}}
@@ -124,7 +128,10 @@ class DataCvt(misc.BPA):
 
 		for k, v in data['calculations'].items ():
 			v = 'NaN' if pd.isnull(v) else v
-			new_data[k] = {k: {'T': data['T'], 'val': v}}
+			if k == 'ema':
+				new_data['candlestick']['ema'] = {'T': data['T'], 'val': v}
+			else:
+				new_data[k] = {k: {'T': data['T'], 'val': v}}
 
 		self.BroadCast (new_data)
 
@@ -138,7 +145,8 @@ chart.add_glyph ('candlestick', 'upstick',       draw_up_candles,    {'T':[],'O'
 chart.add_glyph ('candlestick', 'downstick',     draw_down_candles,  {'T':[],'O':[],'C':[]})
 chart.add_glyph ('candlestick', 'standstick',    draw_stand_candles, {'T':[],'O':[],'C':[]})
 chart.add_glyph ('candlestick', 'buy_decision',  draw_buy,           {'T':[],'L':[]})
-#chart.add_glyph ('candlestick', 'sell_decision', draw_sell,          {'T':[],'H':[]})
+chart.add_glyph ('candlestick', 'sell_decision', draw_sell,          {'T':[],'H':[]})
+chart.add_glyph ('candlestick', 'ema',          draw_ema,          {'T':[],'val':[]})
 
 chart.add_plot ('rsi6', get_figure_rsi)
 chart.add_plot ('pvt', get_figure_pvt)
