@@ -77,17 +77,36 @@ def pattern_recognize (data, op, cp, hp, lp):
 
 	return list(filter(lambda x: x['marks'][-1] != 0, ret_list))
 
-def candle_indicator (data):
-	c_body =(data['C'] + data['O'])/2
-	c_wick = (data['H'] + data['L'])/2
+def candle_indicator (data, pre_data):
+	c_body     = (data['C'] + data['O'])/2
+	c_volatile = (data['H'] + data['L'])/2
+	body       = (data['C'] - data['O'])
+	volatile   = data['H'] - data['L']
 
-	variant = (c_body - c_wick)/(data['H'] - c_wick)
+	pre_body       = (pre_data['C'] - pre_data['O'])
+	pre_volatile   = pre_data['H'] - pre_data['L']
 
-	if (variant > 0.4) and (data['C'] > data['O']):
-			return True
-	if (variant < -0.4) and (data['C'] < data['O']):
-			return False
-	return None
+	if volatile > 0:
+		weight     = abs(body)/volatile if volatile != 0 else 1
+		body_changed   = abs(body) / abs(pre_body) if pre_body != 0 else 1
+
+		distance   = (c_body - c_volatile)/(data['H'] - c_volatile) if data['H'] > c_volatile else 0
+
+		if (pre_volatile < volatile) and (weight < abs(pre_body)/volatile): # epsilon to the trend
+			return None 
+		if weight > 0.6: #reinforce trend
+			if body_changed > 0.6:
+				return body > 0
+			else:
+				return pre_body > 0 
+		if distance > 0.4:
+		#TODO: check if previous reinforce trend too strong
+			return True if (body > 0) else None #or ((body < 0) and (pre_body < 0) and body_changed > 0.3) else False
+		if distance < -0.4:
+		#TODO: check if previous reinforce trend too strong
+			return False if (body < 0) else None #or ((body > 0) and (pre_body < 0) and body_changed > 0.3) else True
+	else:
+		return None
 
 def find_optima (datalist, lastest_noo = 2):
 	result_list = {'peak':[], 'canyon':[]}
