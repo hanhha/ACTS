@@ -95,16 +95,16 @@ def candle_indicator (data, pre_data):
 		if (pre_volatile < volatile) and (weight < abs(pre_body)/volatile): # epsilon to the trend
 			return None 
 		if weight > 0.6: #reinforce trend
-			if body_changed > 0.6:
-				return body > 0
+			if body_changed > 0.4:
+				return True if (pre_body < 0) and (body > 0) else False if (pre_body > 0) and (body < 0) else None
 			else:
-				return pre_body > 0 
+				return None
+		elif weight < 0.08: # too small 
+			return None 
 		if distance > 0.4:
-		#TODO: check if previous reinforce trend too strong
-			return True if (body > 0) else None #or ((body < 0) and (pre_body < 0) and body_changed > 0.3) else False
+			return True if (body > 0) else False if (body < 0) and (pre_body > 0) else None #(False if (body_changed > 0.4) else None) 
 		if distance < -0.4:
-		#TODO: check if previous reinforce trend too strong
-			return False if (body < 0) else None #or ((body > 0) and (pre_body < 0) and body_changed > 0.3) else True
+			return False if (body < 0) else None
 	else:
 		return None
 

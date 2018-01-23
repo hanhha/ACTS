@@ -71,7 +71,7 @@ class AWindow(object):
 	def restore (self):
 		self._win.clear ()
 		for archive in self._archive:
-			self._win.addstr (*archive[0])
+			self._win.addstr (*archive)
 			self.refresh ()
 
 		self.refresh ()

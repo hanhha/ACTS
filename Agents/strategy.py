@@ -8,8 +8,6 @@ class Strategy (misc.BPA):
 		
 		self.is_idle = True
 
-		self.feeling_lucky = params ['i_am_lucky'] # TODO: for fun
-
 		self.seeker.setParams (params)
 		self.risky.setParams  (params)
 

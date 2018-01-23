@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 
-from math import pi
+from math                 import pi
 
-from bokeh.plotting import figure
-from bokeh.models.glyphs import VBar, Segment, Line
+from bokeh.plotting       import figure
+from bokeh.models.glyphs  import VBar, Segment, Line
 from bokeh.models.markers import Triangle 
-from bokeh.models import HoverTool, CrosshairTool
+from bokeh.models         import HoverTool, CrosshairTool
 
 import pandas as pd
 
-from Agents import misc_utils  as misc
-from Agents import chart_utils as chart
+from Agents               import misc_utils  as misc
+from Agents.chart_utils   import Chart
 
 timeframe = 100
 
@@ -89,9 +89,21 @@ def draw_pvt ():
 	g0 = Line (x = 'T', y = 'val', line_color = 'blue')
 	return g0
 
-def draw_ema ():
+def draw_mal ():
 	g0 = Line (x = 'T', y = 'val', line_color = 'blue')
 	return g0
+
+def draw_mas ():
+	g0 = Line (x = 'T', y = 'val', line_color = 'red')
+	return g0
+
+def draw_tbv ():
+	g0 = Line (x = 'T', y = 'val', line_color = 'red')
+	return g0
+
+def draw_vol ():
+	g1 = VBar    (x = 'T', top = 'V', bottom = 0, width = timeframe * 1000 - 2, fill_color = 'cyan', line_color = 'black')
+	return g1
 
 class DataCvt(misc.BPA):
 	def CallBack (self, data):
@@ -122,16 +134,28 @@ class DataCvt(misc.BPA):
 					 'T': data['T']
 				}
 
-		if data['act'][0] == 'buy':
-			new_data['candlestick']['buy_decision'] = {
-					 'L': data['L'],
-					 'T': data['T']
-				}
-		elif data['act'][0] == 'sell':
-			new_data['candlestick']['sell_decision'] = {
-					 'H': data['H'],
-					 'T': data['T']
-				}
+		if type(data['act'][0]) is list:
+			if data['act'][0][0] == 'buy':
+				new_data['candlestick']['buy_decision'] = {
+						 'L': data['L'],
+						 'T': data['T']
+					}
+			if data['act'][0][1] == 'sell':
+				new_data['candlestick']['sell_decision'] = {
+						 'H': data['H'],
+						 'T': data['T']
+					}
+		else:
+			if data['act'][0] == 'buy':
+				new_data['candlestick']['buy_decision'] = {
+						 'L': data['L'],
+						 'T': data['T']
+					}
+			elif data['act'][0] == 'sell':
+				new_data['candlestick']['sell_decision'] = {
+						 'H': data['H'],
+						 'T': data['T']
+					}
 
 		new_data['candlestick']['highlow'] = {
 				'T': data['T'],
@@ -139,33 +163,44 @@ class DataCvt(misc.BPA):
 				'L': data['L']
 			}
 
+		new_data['vol'] = {'vol' : {
+				'T': data['T'],
+				'V': data['V'],
+			}}
+
 		for k, v in data['calculations'].items ():
 			v = 'NaN' if pd.isnull(v) else v
-			if k == 'ema':
-				new_data['candlestick']['ema'] = {'T': data['T'], 'val': v}
+			if k == 'mal':
+				new_data['candlestick']['mal'] = {'T': data['T'], 'val': v}
+			elif k == 'mas':
+				new_data['candlestick']['mas'] = {'T': data['T'], 'val': v}
 			else:
 				new_data[k] = {k: {'T': data['T'], 'val': v}}
 
 		self.BroadCast (new_data)
 
-cvt = DataCvt()
-cvt.BindTo (chart.CallBack)
+cvt   = DataCvt()
+chart = Chart ('ACTS', cvt)
 
 chart.add_plot ('candlestick', get_figure_0)
 
-chart.add_glyph ('candlestick', 'highlow',       draw_highlow_segment, {'T':[],'H':[], 'L':[]})
 chart.add_glyph ('candlestick', 'upstick',       draw_up_candles,    {'T':[],'O':[],'C':[], 'H':[], 'L':[]})
 chart.add_glyph ('candlestick', 'downstick',     draw_down_candles,  {'T':[],'O':[],'C':[], 'H':[], 'L':[]})
 chart.add_glyph ('candlestick', 'standstick',    draw_stand_candles, {'T':[],'O':[],'C':[], 'H':[], 'L':[]})
+chart.add_glyph ('candlestick', 'highlow',       draw_highlow_segment, {'T':[],'H':[], 'L':[]})
 chart.add_glyph ('candlestick', 'buy_decision',  draw_buy,           {'T':[],'L':[]})
 chart.add_glyph ('candlestick', 'sell_decision', draw_sell,          {'T':[],'H':[]})
 chart.add_tool ('candlestick', 'upstick',   get_candlestick_hover())
 chart.add_tool ('candlestick', 'downstick',   get_candlestick_hover())
 chart.add_tool ('candlestick', 'standstick',   get_candlestick_hover())
-chart.add_glyph ('candlestick', 'ema',          draw_ema,          {'T':[],'val':[]})
+chart.add_glyph ('candlestick', 'mal',          draw_mal,          {'T':[],'val':[]})
+chart.add_glyph ('candlestick', 'mas',          draw_mas,          {'T':[],'val':[]})
 
+chart.add_plot ('vol', get_figure_1)
+chart.add_plot ('tbv', get_figure_1)
 chart.add_plot ('rsi6', get_figure_1)
 chart.add_plot ('pvt', get_figure_1)
 chart.add_glyph ('rsi6', 'rsi6', draw_rsi6, {'T':[], 'val':[]})
 chart.add_glyph ('pvt', 'pvt', draw_pvt, {'T':[], 'val':[]})
-
+chart.add_glyph ('vol', 'vol', draw_vol, {'T':[], 'V':[]})
+chart.add_glyph ('tbv', 'tbv', draw_tbv, {'T':[], 'val':[]})

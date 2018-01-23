@@ -13,7 +13,7 @@ from Agents               import acts_config    as s_cfg
 import trader_cfg                               as cfg
 
 if s_cfg.bokeh_en:
-	import analyzer_visual_to_bokeh             as vb
+	import trader_visual_to_bokeh             as vb
 
 
 class Analyzer (misc.BPA):
