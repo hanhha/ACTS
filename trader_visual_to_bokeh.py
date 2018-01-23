@@ -190,9 +190,9 @@ chart.add_glyph ('candlestick', 'standstick',    draw_stand_candles, {'T':[],'O'
 chart.add_glyph ('candlestick', 'highlow',       draw_highlow_segment, {'T':[],'H':[], 'L':[]})
 chart.add_glyph ('candlestick', 'buy_decision',  draw_buy,           {'T':[],'L':[]})
 chart.add_glyph ('candlestick', 'sell_decision', draw_sell,          {'T':[],'H':[]})
-chart.add_tool ('candlestick', 'upstick',   get_candlestick_hover())
-chart.add_tool ('candlestick', 'downstick',   get_candlestick_hover())
-chart.add_tool ('candlestick', 'standstick',   get_candlestick_hover())
+chart.add_tool ('candlestick', 'upstick',   get_candlestick_hover)
+chart.add_tool ('candlestick', 'downstick',   get_candlestick_hover)
+chart.add_tool ('candlestick', 'standstick',   get_candlestick_hover)
 chart.add_glyph ('candlestick', 'mal',          draw_mal,          {'T':[],'val':[]})
 chart.add_glyph ('candlestick', 'mas',          draw_mas,          {'T':[],'val':[]})
 

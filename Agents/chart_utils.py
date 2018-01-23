@@ -81,10 +81,10 @@ class Chart(misc.BPA):
 			self.cb_lock.acquire ()
 			self.doc = doc
 			self.plots_list = list ()
+			self.renderers = dict ()
 			
 			for k, plot in self.plots.items():
 				fig = plot ()
-				self.renderers [k] = dict ()
 		
 				for gk, gv in self.glyphs[k].items():
 					tmp_dict = self.sources[k][gk].to_df().to_dict(orient='list')
@@ -92,29 +92,30 @@ class Chart(misc.BPA):
 		
 					glyph = gv ()
 		
+					tmp_rndr = None
 					if type(glyph) is tuple:
-						tmp = None
 						for g in glyph:
-							tmp = fig.add_glyph (self.sources[k][gk], g)
-		
-						self.renderers [k][gk] = tmp # last ride of the day
-		
+							tmp_rndr = fig.add_glyph (self.sources[k][gk], g)
 					else:
-						tmp = fig.add_glyph (self.sources[k][gk], glyph)
-						self.renderers [k][gk] = tmp 
+						tmp_rndr = fig.add_glyph (self.sources[k][gk], glyph)
+		
+					self.renderers [k] = {gk : tmp_rndr}
 		
 					if k in self.additional_tools.keys():
 						if gk in self.additional_tools[k].keys():
 							tool = self.additional_tools[k][gk]
 		
 							if type(tool) is not list:
-								tool.renderers = [self.renderers [k][gk]]
-								fig.add_tools (tool)
+								tool_instance = tool ()
+								tool_instance.renderers = [self.renderers [k][gk]]
+								fig.add_tools (tool_instance)
 		
 							else:
 								for t in tool:
-									t.renderers = [self.renderers [k][gk]]
-									fig.add_tools (t)
+									tool_instance = t ()
+									tool_instance.renderers = [self.renderers [k][gk]]
+									fig.add_tools (tool_instance)
+
 				if len(self.plots_list) > 0:
 					fig.x_range = self.plots_list[-1].x_range	
 		
@@ -123,7 +124,7 @@ class Chart(misc.BPA):
 			@gen.coroutine
 			def real_update_data ():
 				self.new_data_lock.acquire ()
-				self.new_plot_data = new_data.copy()
+				self.new_plot_data = self.new_data.copy()
 				self.new_data = dict ()
 				self.new_data_lock.release ()
 			
@@ -140,13 +141,13 @@ class Chart(misc.BPA):
 				if self.cb_lock.acquire (False):
 					self.doc.add_next_tick_callback (real_update_data)
 			
-				self.doc.title = self.title 
-				self.doc.add_root (column(*self.plots_list, sizing_mode = 'scale_width'))
+			self.doc.title = self.title 
+			self.doc.add_root (column(*self.plots_list, sizing_mode = 'scale_width'))
 			
-				self.doc.add_periodic_callback (update_data, 1000)
-				self.cb_lock.release ()
+			self.doc.add_periodic_callback (update_data, 1000)
+			self.cb_lock.release ()
 			
-				return self.doc
+			return self.doc
 	
 		app = {'/analyzing': Application(FunctionHandler(modify_document))}
 	
