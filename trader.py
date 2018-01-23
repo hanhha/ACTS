@@ -51,9 +51,14 @@ class Trader (misc.BPA):
 		try:
 			while not self.monitor._Stop.is_set():
 				self.monitor._Stop.wait (1)
-		except	(KeyboardInterrupt, SystemExit): 
-			print ("\rInterrupt received. Stoping auto trading system ...")
 
+			self.shout ('****************')
+			self.shout ('* Process done *')
+			self.shout ('****************')
+
+		except	(KeyboardInterrupt, SystemExit): 
+			self.shout ("Interrupt received. Stoping auto trading system ...")
+		
 		self.monitor.stop ()	
 
 		if cfg.cmd_args.save:
@@ -84,6 +89,8 @@ def main (stdscr):
 	trader.idle  ()
 
 	if not cfg.cmd_args.no_curses:
+		trading_ui.printCur ("Press any key to exit this UI and see the report ...")
+		c = trading_ui.getch ()
 		trading_ui.end ()
 
 if __name__ == "__main__":

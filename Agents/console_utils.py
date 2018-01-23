@@ -1,5 +1,12 @@
-import curses
 from threading import Lock, Event 
+from curses    import doupdate
+
+import curses
+
+try:
+	from . import misc_utils as misc
+except (SystemError, ImportError):
+	import misc_utils as misc 
 
 class ConsoleScreen(object):
 	def __init__ (self):
@@ -101,3 +108,77 @@ class ABoxWindow(AWindow):
 	def resize (self, h, w, y, x):
 		self.createBox (h, w, y, x, title = self._title)
 		AWindow.resize (self, h - 2, w - 2, y + 1, x + 1)
+
+class SimpleWinMan(ConsoleScreen):
+	def __init__ (self, title, **kwargs):
+		self.title   = title
+		self.maxX    = None 
+		self.maxY    = None 
+		self.verbose = kwargs ['verbose'] if 'verbose' in kwargs.keys() else 2
+
+		ConsoleScreen.__init__ (self)
+
+	def start (self):
+		ConsoleScreen.start (self)
+		self.cook ()
+		self.run ()
+
+	def run (self):
+		def worker ():
+			while (not self._Stop.is_set()):
+				resized = curses.is_term_resized(self.maxY, self.maxX)
+				if resized:
+					self.cook (refresh = True)
+				doupdate ()
+				self._Stop.wait (0.1)
+
+		self._execThread = Thread (name = "curses_ui", target = worker)
+		self._execThread.start ()
+
+		self.enabled = True
+
+	def cook (self, resize = False):
+		self.clsLock.acquire ()
+
+		self.maxY, self.maxX = self.screen.getmaxyx ()
+
+		curses.start_color ()
+		curses.init_pair (1, curses.COLOR_GREEN , curses.COLOR_BLACK)
+		curses.init_pair (2, curses.COLOR_RED   , curses.COLOR_BLACK)
+		curses.init_pair (3, curses.COLOR_WHITE , curses.COLOR_BLACK)
+
+		self.screen.refresh ()
+
+		if self.maxY < 20 or self.maxX < 40:
+			self.screen.clear ()
+			self.screen.addstr (0,0, "Screen to small to show in colorful mode!", curses.color_pair(3))
+		else:
+			self.generate (resize)
+
+		self.clsLock.release ()
+
+	def generate (self, resize):
+		pass # Need override
+
+	@staticmethod
+	def createWindow (h, w, y, x, title = None, refWin = None, initial_content = None, bkgd = None):
+		if refWin is None:
+			Win = ABoxWindow (h, w, y, x, title = title, initial_content = initial_content, bkgd = bkgd)
+		else:
+			Win = refWin
+			Win.resize (h, w, y, x)
+
+		return Win 
+
+	def print_on_window (self, window, *args, **kwargs):
+		if self.enabled:
+			window.addstr (*args)
+		else:
+			if (('verbose' in kwargs.keys()) and (self.verbose >=  kwargs['verbose'])) or ('verbose' not in kwargs.keys()):
+				for arg in args:
+					if type(arg) is str:
+						print (arg)
+						break
+
+	def getch (self, *args):
+		return self.screen.getch (*args)
