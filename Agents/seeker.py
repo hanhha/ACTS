@@ -22,6 +22,9 @@ class BaseSeeker (misc.BPA):
 		self._goal = self._params ['goal']
 		self._fee  = self._params ['fee']
 
+	def check_gainable (self, bprice, gain):
+		return (1 - self._fee)/(2 * self._fee) > (bprice / gain)
+
 	def check_profit_achieved (self, price):
 		gprice = price * (1 - self._fee)
 		return (gprice * self._qty_bought) > (self._investment)

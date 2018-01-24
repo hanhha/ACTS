@@ -105,6 +105,16 @@ def draw_vol ():
 	g1 = VBar    (x = 'T', top = 'V', bottom = 0, width = timeframe * 1000 - 2, fill_color = 'cyan', line_color = 'black')
 	return g1
 
+def draw_lbb ():
+	mal = Line (x = 'T', y = 'lower', line_color = 'blue')
+	mau = Line (x = 'T', y = 'upper', line_color = 'blue')
+	return mal, mau
+
+def draw_sbb ():
+	mal = Line (x = 'T', y = 'lower', line_color = 'red')
+	mau = Line (x = 'T', y = 'upper', line_color = 'red')
+	return mal, mau
+
 class DataCvt(misc.BPA):
 	def CallBack (self, data):
 		new_data = {'candlestick':{}}
@@ -169,13 +179,18 @@ class DataCvt(misc.BPA):
 			}}
 
 		for k, v in data['calculations'].items ():
-			v = 'NaN' if pd.isnull(v) else v
-			if k == 'mal':
-				new_data['candlestick']['mal'] = {'T': data['T'], 'val': v}
-			elif k == 'mas':
-				new_data['candlestick']['mas'] = {'T': data['T'], 'val': v}
-			else:
-				new_data[k] = {k: {'T': data['T'], 'val': v}}
+			#v = 'NaN' if pd.isnull(v) else v
+			if not pd.isnull(v):
+				if k == 'mal':
+					new_data['candlestick']['mal'] = {'T': data['T'], 'val': v}
+				elif k == 'mas':
+					new_data['candlestick']['mas'] = {'T': data['T'], 'val': v}
+				elif k == 'ssd':
+					new_data['candlestick']['sbb'] = {'T': data['T'], 'upper': data['calculations']['mas'] + v * 2, 'lower': data['calculations']['mas'] - v * 2}
+				elif k == 'lsd':
+					new_data['candlestick']['lbb'] = {'T': data['T'], 'upper': data['calculations']['mal'] + v * 2, 'lower': data['calculations']['mal'] - v * 2}
+				else:
+					new_data[k] = {k: {'T': data['T'], 'val': v}}
 
 		self.BroadCast (new_data)
 
@@ -195,6 +210,8 @@ chart.add_tool ('candlestick', 'downstick',   get_candlestick_hover)
 chart.add_tool ('candlestick', 'standstick',   get_candlestick_hover)
 chart.add_glyph ('candlestick', 'mal',          draw_mal,          {'T':[],'val':[]})
 chart.add_glyph ('candlestick', 'mas',          draw_mas,          {'T':[],'val':[]})
+chart.add_glyph ('candlestick', 'lbb',          draw_lbb,          {'T':[],'upper':[], 'lower':[]})
+chart.add_glyph ('candlestick', 'sbb',          draw_sbb,          {'T':[],'upper':[], 'lower':[]})
 
 chart.add_plot ('vol', get_figure_1)
 chart.add_plot ('tbv', get_figure_1)
