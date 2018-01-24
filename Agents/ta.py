@@ -45,6 +45,19 @@ def PVT (datalist, price, pre_pvt = 0):
 
 	return pvt.copy ()
 
+def TBV (datalist, pre_tbv = 0):
+	tbv = list ()
+	for idx, data in enumerate (datalist):
+		if idx > 0:
+			_pre_tbv = tbv [idx - 1]
+		else:
+			_pre_tbv = pre_tbv
+
+		_tbv = _pre_tbv + (data['BV'] if data['C'] > data['O']else -data['BV'])
+		
+		tbv.append (_tbv)
+	return tbv.copy ()
+
 def MA (data, period, interest, ma_type):
 	ret = abstract.MA (data, timeperiod = period, price = interest, matype = ma_type)
 	return ret
