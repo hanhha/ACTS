@@ -90,7 +90,7 @@ def main (stdscr):
 
 	if not cfg.cmd_args.no_curses:
 		trading_ui.printCur ("Press any key to exit this UI and see the report ...")
-		c = trading_ui.getch ()
+		c = trading_ui.getch (True)
 		trading_ui.end ()
 
 if __name__ == "__main__":

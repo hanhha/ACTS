@@ -1,4 +1,4 @@
-from threading import Lock, Event 
+from threading import Thread, Lock, Event 
 from curses    import doupdate
 
 import curses
@@ -116,6 +116,8 @@ class SimpleWinMan(ConsoleScreen):
 		self.maxY    = None 
 		self.verbose = kwargs ['verbose'] if 'verbose' in kwargs.keys() else 2
 
+		self.tmpWin  = dict () 
+
 		ConsoleScreen.__init__ (self)
 
 	def start (self):
@@ -128,7 +130,7 @@ class SimpleWinMan(ConsoleScreen):
 			while (not self._Stop.is_set()):
 				resized = curses.is_term_resized(self.maxY, self.maxX)
 				if resized:
-					self.cook (refresh = True)
+					self.cook (True)
 				doupdate ()
 				self._Stop.wait (0.1)
 
@@ -179,6 +181,11 @@ class SimpleWinMan(ConsoleScreen):
 					if type(arg) is str:
 						print (arg)
 						break
+	
+	@staticmethod
+	def MsgBox (title = None, info = '...', confirm = False):
+		pass	
 
-	def getch (self, *args):
-		return self.screen.getch (*args)
+	def getch (self, block = True):
+		self.screen.nodelay (not block)
+		return self.screen.getch ()
