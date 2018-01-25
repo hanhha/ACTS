@@ -15,6 +15,7 @@ class UserInterface(cls.SimpleWinMan):
 		self.tipWin = None
 		self.evaWin = None
 		self.curWin = None
+		self.sumWin = None
 
 		cls.SimpleWinMan.__init__ (self, title, **kwargs)
 
@@ -22,6 +23,7 @@ class UserInterface(cls.SimpleWinMan):
 		self.showTitle      (resize)
 		self.showTip        (resize)
 		self.showEvaluation (resize)
+		self.showSummary    (resize)
 		self.showCurrent    (resize)
 
 	def showTitle (self, resize = False):
@@ -36,9 +38,15 @@ class UserInterface(cls.SimpleWinMan):
 
 	def showEvaluation (self, resize = False):
 		if self.evaWin == None or resize:
-			h = self.maxY - 10 
+			h = self.maxY - 10 - 5 
 			w = self.maxX // 2
 			self.evaWin = self.createWindow (h, w, 10, 0, "Trading activities", refWin = self.evaWin if (self.evaWin is not None) and resize else None, bkgd = curses.color_pair(3))
+
+	def showSummary (self, resize = False):
+		if self.sumWin == None or resize:
+			h = 5
+			w = self.maxX // 2
+			self.sumWin = self.createWindow (h, w, self.maxY - 5, 0, "Summaries", refWin = self.sumWin if (self.sumWin is not None) and resize else None, bkgd = curses.color_pair(3))
 
 	def showCurrent (self, resize = False):
 		if self.curWin == None or resize:
@@ -62,7 +70,19 @@ class UserInterface(cls.SimpleWinMan):
 			self.print_on_window (self.curWin, text + '\n', curses.color_pair(cp) if self.enabled else None, **kwargs)
 		else:
 			self.print_on_window (self.curWin, text + '\n', **kwargs)
-	
+
+	def printSum (self, key, val):
+		if key == 'runtime':
+			y = 0
+		elif key == 'cycle':
+			y = 1
+		elif key == 'init':
+			y = 2
+		elif key == 'last':
+			y = 3
+
+		self.print_on_window (self.sumWin, str(val), y, 0)	
+
 def main (stdscr):
 	ui = UserInterface ("Test")
 
