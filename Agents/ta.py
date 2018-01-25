@@ -10,6 +10,23 @@ CandleSticksPatternList = talib.get_function_groups()['Pattern Recognition']
 def pandas_convert (dictdata):
 	return pd.DataFrame (dictdata)
 
+def scale (number, refnum):
+	if refnum < 0.000001:
+		mul = 1000000
+	elif refnum < 0.00001:
+		mul = 100000
+	elif refnum < 0.0001:
+		mul = 10000
+	elif refnum < 0.001:
+		mul = 1000
+	elif refnum < 0.01:
+		mul = 100
+	elif refnum < 0.01:
+		mul = 10
+	else:
+		mul = 1
+	return number * mul
+
 def scale_up (data, interest):
 	sample = data[interest].max()
 	if sample < 0.000001:
@@ -53,7 +70,7 @@ def TBV (datalist, pre_tbv = 0):
 		else:
 			_pre_tbv = pre_tbv
 
-		_tbv = _pre_tbv + (data['BV'] if data['C'] > data['O']else -data['BV'])
+		_tbv = _pre_tbv + (data['BV'] if data['C'] > data['O'] else 0 - data['BV'])
 		
 		tbv.append (_tbv)
 	return tbv.copy ()

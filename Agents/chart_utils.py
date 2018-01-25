@@ -13,6 +13,7 @@ from collections import OrderedDict
 from pandas import DataFrame
 
 from threading import Thread, Lock
+from copy      import deepcopy
 
 from . import misc_utils as misc
 
@@ -124,7 +125,7 @@ class Chart(misc.BPA):
 			@gen.coroutine
 			def real_update_data ():
 				self.new_data_lock.acquire ()
-				self.new_plot_data = self.new_data.copy()
+				self.new_plot_data = deepcopy(self.new_data)
 				self.new_data = dict ()
 				self.new_data_lock.release ()
 			

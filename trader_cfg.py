@@ -16,8 +16,9 @@ configuration ['trial'] = True if configuration ['simulation'] else configuratio
 
 parser = ArgumentParser()
 
-parser.add_argument ('-v', '--verbose', type = int, default = 2, help = 'Select verbose mode, there are 3 modes similar to Unix permissions')
-parser.add_argument ('-n', '--no_curses', action = 'store_true', default = False, help = 'Not using curses to render UI')
-parser.add_argument ('-s', '--save', action = 'store_true', default = False, help = 'Save predictions and transactions to JSON files')
+parser.add_argument ('-v', '--verbose', type = int, default = 2, help = 'Select verbose level')
+parser.add_argument ('-s', '--simple_ui', action = 'store_true', default = False, help = 'Not using curses to render UI')
+parser.add_argument ('-a', '--archive', action = 'store_true', default = False, help = 'Save predictions and transactions to JSON files')
+parser.add_argument ('-n', '--no_chart', action = 'store_true', default = False, help = 'Not creating charts')
 
 cmd_args = parser.parse_args ()

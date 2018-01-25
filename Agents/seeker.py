@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
-from . import misc_utils as misc
 from pandas import DataFrame
+
+from . import misc_utils as misc
+from . import ta
 
 class BaseSeeker (misc.BPA):
 	def __init__ (self, source, params):
@@ -23,7 +25,8 @@ class BaseSeeker (misc.BPA):
 		self._fee  = self._params ['fee']
 
 	def check_gainable (self, bprice, gain):
-		return (1 - self._fee)/(2 * self._fee) > (bprice / gain)
+		res = gain * (1 - self._fee) > bprice * self._fee * 2
+		return res
 
 	def check_profit_achieved (self, price):
 		gprice = price * (1 - self._fee)

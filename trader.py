@@ -61,7 +61,7 @@ class Trader (misc.BPA):
 		
 		self.monitor.stop ()	
 
-		if cfg.cmd_args.save:
+		if cfg.cmd_args.archive:
 			self.predict_eva.save ('predict_{mar}.json'.format(mar = cfg.configuration['market']))
 			self.profit_eva.save ('profit_{mar}.json'.format(mar = cfg.configuration['market']))
 
@@ -78,17 +78,18 @@ trader.monitor.setShoutFunc    (trading_ui.printCur)
 trader.strategy.setShoutFunc   (trading_ui.printCur)
 
 def main (stdscr):
-	if not cfg.cmd_args.no_curses:
+	if not cfg.cmd_args.simple_ui:
 		trading_ui.start ()
 
-	trading_ui.printTip ("Showing time is GMT0 to match with returned data from exchange ...")
-	trading_ui.printTip ("Charts shows at <hostname>:8888/analyzing ...")
+		trading_ui.printTip ("Showing time is GMT0 to match with returned data from exchange ...")
+		trading_ui.printTip ("Charts shows at <hostname>:8888/analyzing ...")
+
 	trading_ui.printTip ("Press Ctrl-C or Ctrl-Break (Windows) to stop ...")
 
 	trader.start ()
 	trader.idle  ()
 
-	if not cfg.cmd_args.no_curses:
+	if not cfg.cmd_args.simple_ui:
 		trading_ui.printCur ("Press any key to exit this UI and see the report ...")
 		c = trading_ui.getch (True)
 		trading_ui.end ()
@@ -96,7 +97,6 @@ def main (stdscr):
 if __name__ == "__main__":
 	print ('Auto Crypto Trading System')
 	print ('\n' + 'Welcome. I can help you to monitor and trade crypto coins. But it would be better if under supervisor ...')
-	sleep (0.5)
 
 	if cfg.configuration ['simulation']:
 		print ('It\'s attemping to run simulation. A bunch of history data will be fetched from exchange server ...')
@@ -111,9 +111,7 @@ if __name__ == "__main__":
 		print ('Please be kindly notice that I can simulate your trading based on your strategy ...')
 		sleep (0.5)
 		print ('Make sure that you are running on trial mode by enable it in trader_cfg.py file if you are unsure about what you are doing ...')
-		sleep (0.5)
 		print ('You can stop auto trading system whenever you decide by pressing Ctrl-C (or Ctrl-Break on Windows) ...')
-		sleep (0.5)
 		if cfg.configuration ['trial']:
 			ans = input ('If you answer \'yes\', trial trading with updated market data will be performed so that your wallet will be safe. Do you want to run on trial mode? ')
 			if ans == 'yes':
@@ -129,7 +127,7 @@ if __name__ == "__main__":
 				print ('Smart choice right now.')
 				quit ()
 
-	if s_cfg.bokeh_en:
+	if s_cfg.bokeh_en and not cfg.cmd_args.no_chart:
 		print (s_cfg.config ['Bokeh']['allowed_origins'])	
 		list_origins = list(filter(lambda s: s != '', list(map (lambda x:x.strip(), [o for o in s_cfg.config['Bokeh']['allowed_origins'].split (',')]))))
 
