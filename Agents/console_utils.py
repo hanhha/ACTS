@@ -109,19 +109,28 @@ class ABoxWindow(AWindow):
 		self.createBox (h, w, y, x, title = self._title)
 		AWindow.resize (self, h - 2, w - 2, y + 1, x + 1)
 
+class UITree(object):
+	def __init__ (self, layoutfile):
+		self.tree = None
+		self.parse_layout (layoutfile)
+
 class SimpleWinMan(ConsoleScreen):
 	def __init__ (self, title, **kwargs):
 		self.title   = title
 		self.maxX    = None 
 		self.maxY    = None 
 		self.verbose = kwargs ['verbose'] if 'verbose' in kwargs.keys() else 2
-
-		self.tmpWin  = dict () 
+		self.windows = dict () 
 
 		ConsoleScreen.__init__ (self)
 
+		self.windows_tree = UITree (kwargs['layoutfile'], self.maxY, self.maxX) if 'layoutfile' in kwargs else None
+
 	def start (self):
 		ConsoleScreen.start (self)
+
+		self.maxY, self.maxX = self.screen.getmaxyx ()
+
 		self.cook ()
 		self.run ()
 
@@ -160,7 +169,11 @@ class SimpleWinMan(ConsoleScreen):
 		self.clsLock.release ()
 
 	def generate (self, resize):
-		pass # Need override
+		if resize:
+			self.windows_tree.update (self.maxY, self.maxX)
+
+		for n in self.windows_tree.nodes ():
+			self.showWin (n, resize)
 
 	@staticmethod
 	def createWindow (h, w, y, x, title = None, refWin = None, initial_content = None, bkgd = None):
@@ -171,6 +184,17 @@ class SimpleWinMan(ConsoleScreen):
 			Win.resize (h, w, y, x)
 
 		return Win 
+
+	def showWin (self, n, resize = False):
+		if self.windows[n] == None or resize:
+			h     = self.windows_tree.get (n, 'height')
+			w     = self.windows_tree.get (n, 'width')
+			y     = self.windows_tree.get (n, 'y')
+			x     = self.windows_tree.get (n, 'x')
+			title = self.windows_tree.get (n, 'title')
+			text  = self.windows_tree.get (n, 'text')
+
+			self.windows[n] = self.createWindow (h, w, y, x, title, refWin = self.windows[n] if (self.windows[n] is not None) and resize else None, bkgd = curses.color_pair (3), initial_content = text)
 
 	def print_on_window (self, window, *args, **kwargs):
 		if self.enabled:
