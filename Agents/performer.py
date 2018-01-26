@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
-from time import sleep
+from threading import Lock
+
 from . import exchange as exch
 from . import misc_utils as misc
 
@@ -10,6 +11,7 @@ class Performer (misc.BPA):
 		self._invest_stage = True
 		self._capital = None
 		self._avail_qty = 0 
+		self._exec_lock = Lock ()
 
 	def process_order_params (self, data, price, qty, for_sell = False):
 		_price = misc.norm(price)
@@ -29,6 +31,7 @@ class Performer (misc.BPA):
 		
 	@staticmethod
 	def buy (market, price, qty):
+		self._exec_lock.acquire ()
 		_price, _qty = exch.process_order_params (market, price, qty, for_sell=False)
 		if (_price is not None) and (_qty is not None):
 			order_res, msg = exch.buy_limit (market, _qty, _price)
@@ -37,6 +40,7 @@ class Performer (misc.BPA):
 
 	@staticmethod
 	def sell (market, price, qty):
+		self._exec_lock.acquire ()
 		_price, _qty = exch.process_order_params (market, price, qty, for_sell=True)
 		if (_price is not None) and (_qty is not None):
 			order_res, msg = exch.sell_limit (market, _qty, _price)
@@ -58,7 +62,8 @@ class Performer (misc.BPA):
 			else:
 				ret_data ['status'] = False
 				ret_data ['msg']    = order ['message']
-			sleep (1)
+				self._exec_lock.wait (1)
+		self._exec_lock.release ()
 		return ret_dat
 
 	def invest (self, params):

@@ -34,6 +34,8 @@ class Trader (misc.BPA):
 		self.monitor.BkdrBindTo (self.strategy.seeker.BkdrCallBack)
 		self.performer.setFeedback (self.strategy.performed_well)
 
+		self.reporter = None
+
 	def start (self):
 		self.shout ('Fetching history ...')
 
@@ -47,9 +49,33 @@ class Trader (misc.BPA):
 
 		self.shout ('History fetched ...')
 
+	def report (self, key, val):
+		if self.reporter is not None:
+			self.reporter (key, val)
+
 	def idle (self):
 		try:
+			last_completes = 0
+			last_broadcasted = 0
+
 			while not self.monitor._Stop.is_set():
+				# report
+				if self.profit_eva.archive_len == 1:
+					self.report ('init', self.profit_eva.initial_cap)
+
+				if self.monitor.BroadCasted > last_broadcasted:
+					last_broadcasted = self.monitor.BroadCasted
+					self.report ('runtime', last_broadcasted)
+
+				if self.profit_eva.n_completes > last_completes:
+					last_completes = self.profit_eva.n_completes
+					self.report ('cycle', last_completes)
+					self.report ('last', self.profit_eva.last_cap)
+					self.report ('on_going', 0)
+
+				if self.profit_eva.archive_len > last_completes:
+					self.report ('on_going', self.profit_eva.on_tran_cap)
+			
 				self.monitor._Stop.wait (1)
 
 			self.shout ('****************')
@@ -76,6 +102,7 @@ trader.setShoutFunc            (trading_ui.printCur)
 trader.profit_eva.setShoutFunc (trading_ui.printEva)
 trader.monitor.setShoutFunc    (trading_ui.printCur)
 trader.strategy.setShoutFunc   (trading_ui.printCur)
+trader.reporter                = trading_ui.printSum
 
 def main (stdscr):
 	if not cfg.cmd_args.simple_ui:
@@ -128,13 +155,13 @@ if __name__ == "__main__":
 				quit ()
 
 	if s_cfg.bokeh_en and not cfg.cmd_args.no_chart:
-		print (s_cfg.config ['Bokeh']['allowed_origins'])	
-		list_origins = list(filter(lambda s: s != '', list(map (lambda x:x.strip(), [o for o in s_cfg.config['Bokeh']['allowed_origins'].split (',')]))))
+		print (s_cfg.config.bokeh.allowed_origin)	
+		list_origins = list(filter(lambda s: s != '', list(map (lambda x:x.strip(), [o for o in s_cfg.config.bokeh.allowed_origins.split (',')]))))
 
 		vb.timeframe = trader._params['interval']
 
 		vb.chart.allow_websocket_origin = list_origins
-		vb.chart.port                   = int(s_cfg.config ['Bokeh']['port'])
+		vb.chart.port                   = int(s_cfg.config.bokeh.port)
 		vb.chart.start ()
 
 	main (0)

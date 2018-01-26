@@ -1,11 +1,10 @@
-import configparser as CfgPsr
+from localconfig import LocalConfig
 import os
 
 config = None
 
 if os.path.isfile ('acts_config.ini'):
-	config = CfgPsr.ConfigParser ()
-	config.read ('acts_config.ini')
+	config = LocalConfig ('acts_config.ini')
 
 else:
 	print ("It seems that this is your first time :)")
@@ -32,9 +31,8 @@ else:
 
 	else:
 		print ("Thanks. Hope we will work together well.")
-		config = CfgPsr.ConfigParser ()
-		config.read ('acts_config.ini')
+		config = LocalConfig ('acts_config.ini')
 
-telegram_en = True if 'Telegram' in config.keys() else False
+telegram_en = True if config.telegram else False
 
-bokeh_en = True if 'Bokeh' in config.keys() else False
+bokeh_en = True if config.bokeh else False

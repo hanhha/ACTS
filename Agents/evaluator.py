@@ -11,6 +11,7 @@ class Evaluator (misc.BPA):
 		misc.BPA.__init__ (self, source = source)
 		self.archive = list ()  
 		self.pdarchive = DataFrame ()
+		self.archive_len = 0
 
 	def record (self, data):
 		assert 'Not implemented yet', 0
@@ -53,6 +54,14 @@ class Evaluator (misc.BPA):
 				self.record (data)
 
 class ProfitEvaluator (Evaluator):
+	def __init__ (self, *args, **kwargs):
+		Evaluator.__init__ (self, *args, **kwargs)
+
+		self.n_completes = 0
+		self.initial_cap = 0
+		self.last_cap = 0
+		self.on_tran_cap = 0
+		
 	def record (self, data):
 		# request data [type, timestamp, order_info]
 		# store [timestamp, buy_order_uuid, sell_order_uuid, profit]
@@ -60,12 +69,25 @@ class ProfitEvaluator (Evaluator):
 			self.archive.append ([data[1], data[2]['uuid']])
 			self._gross_invest = data[2]['price'] + data[2]['fee']
 			self.shout ('Bought with gross price {price}'.format (price = self._gross_invest), good = True)
+
+			if self.archive_len == 0:
+				self.initial_cap = self._gross_invest
+
+			self.archive_len += 1
+
+			self.on_tran_cap = self._gross_invest
+
+				
 		elif data[0] == 'sell':
 			gross_return = data[2]['price'] - data[2]['fee']
 			d = gross_return - self._gross_invest
 			profit = {'diff': d, 'percent': d / self._gross_invest}
 			self.archive[-1].extend ([data[1], data[2]['uuid'], profit])
 			self.shout ('Sold with gross price {hprice} - Profit {p}'.format (hprice = gross_return, p = d), good = d > 0)
+
+			self.last_cap = gross_return
+			
+			self.n_completes += 1
 		else:
 			self.shout ('Unknown data for profit evaluation.')
 
@@ -81,12 +103,11 @@ class PredictEvaluator (Evaluator):
 		self.archive.append (data.copy())
 
 		new_data ['buy_decision'] = None
-		if 'act' in new_data.keys():
-			new_data ['buy_decision'] = new_data['act'][0] == 'buy'
-		else:
-			new_data ['buy_decision'] = False
+		new_data ['buy_decision'] = new_data['act'][0] == 'buy' if 'act' in new_data else False
 
 		self.pdarchive = self.pdarchive.append (new_data, ignore_index = True)
+
+		self.archive_len += 1
 
 	def visualize (self):
 		Evaluator.visualize (self)

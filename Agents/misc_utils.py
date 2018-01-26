@@ -31,6 +31,8 @@ class BPA (object): # Base Processing Agent
 		self._observer = list ()
 		self._bkdr_observer = list ()
 		self._print_func = None
+		
+		self._broadcasted = 0
 
 	def Bind (self, source):
 		self._source = source
@@ -39,7 +41,7 @@ class BPA (object): # Base Processing Agent
 
 	def setParams (self, params):
 		self._params = params.copy ()
-		if 'shout_func' in self._params.keys():
+		if 'shout_func' in self._params:
 			self._print_func = self._params['shout_func']
 	
 	def setShoutFunc (self, func):
@@ -49,7 +51,7 @@ class BPA (object): # Base Processing Agent
 		if self._print_func is not None:
 			_text = repr(text) if type(text) is not str else text
 			try:
-				_kwargs = {**kwargs, **{'verbose':2}} if 'verbose' not in kwargs.keys() else kwargs
+				_kwargs = {**kwargs, **{'verbose':2}} if 'verbose' not in kwargs else kwargs
 				self._print_func (_text, **_kwargs)
 			except (AttributeError, TypeError):
 				print (_text)
@@ -65,6 +67,12 @@ class BPA (object): # Base Processing Agent
 	def BroadCast (self, data):
 		for cb in self._observer:
 			cb (data)
+
+		self._broadcasted += 1
+
+	@property
+	def BroadCasted (self):
+		return self._broadcasted
 
 	def BroadCastPush (self, data):
 		for cb in self._bkdr_observer:

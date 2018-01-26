@@ -38,15 +38,15 @@ class UserInterface(cls.SimpleWinMan):
 
 	def showEvaluation (self, resize = False):
 		if self.evaWin == None or resize:
-			h = self.maxY - 10 - 5 
+			h = self.maxY - 10 - 7 
 			w = self.maxX // 2
 			self.evaWin = self.createWindow (h, w, 10, 0, "Trading activities", refWin = self.evaWin if (self.evaWin is not None) and resize else None, bkgd = curses.color_pair(3))
 
 	def showSummary (self, resize = False):
 		if self.sumWin == None or resize:
-			h = 5
+			h = 7
 			w = self.maxX // 2
-			self.sumWin = self.createWindow (h, w, self.maxY - 5, 0, "Summaries", refWin = self.sumWin if (self.sumWin is not None) and resize else None, bkgd = curses.color_pair(3))
+			self.sumWin = self.createWindow (h, w, self.maxY - 7, 0, "Summaries", refWin = self.sumWin if (self.sumWin is not None) and resize else None, bkgd = curses.color_pair(3))
 
 	def showCurrent (self, resize = False):
 		if self.curWin == None or resize:
@@ -55,7 +55,7 @@ class UserInterface(cls.SimpleWinMan):
 			self.curWin = self.createWindow (h, w, 10, self.maxX // 2, "Latest info", refWin = self.curWin if (self.curWin is not None) and resize else None, bkgd = curses.color_pair(3))
 
 	def printEva (self, text, **kwargs):
-		if 'good' in kwargs.keys():
+		if 'good' in kwargs:
 			cp = 1 if kwargs['good'] else 2
 			self.print_on_window (self.evaWin, text + '\n', curses.color_pair(cp) if self.enabled else None, **kwargs)
 		else:
@@ -65,7 +65,7 @@ class UserInterface(cls.SimpleWinMan):
 		self.print_on_window (self.tipWin, text + '\n', **kwargs)
 
 	def printCur (self, text, **kwargs):
-		if 'good' in kwargs.keys():
+		if 'good' in kwargs:
 			cp = 1 if kwargs['good'] else 2
 			self.print_on_window (self.curWin, text + '\n', curses.color_pair(cp) if self.enabled else None, **kwargs)
 		else:
@@ -74,14 +74,21 @@ class UserInterface(cls.SimpleWinMan):
 	def printSum (self, key, val):
 		if key == 'runtime':
 			y = 0
+			text = "Ret. candlesticks    : {n}".format (n = val)
 		elif key == 'cycle':
 			y = 1
+			text = "Completed trade      : {n}".format (n = val)
 		elif key == 'init':
 			y = 2
+			text = "Initial cap          : {n}".format (n = val)
 		elif key == 'last':
 			y = 3
+			text = "Last trade gross     : {n}".format (n = val)
+		elif key == 'on_going':
+			y = 4
+			text = "Cap on current trade : {n}".format (n = val)
 
-		self.print_on_window (self.sumWin, str(val), y, 0)	
+		self.println_on_window (self.sumWin, y, 0, text)	
 
 def main (stdscr):
 	ui = UserInterface ("Test")

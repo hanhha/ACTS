@@ -15,6 +15,8 @@ from pandas import DataFrame
 from threading import Thread, Lock
 from copy      import deepcopy
 
+import logging
+
 from . import misc_utils as misc
 
 class Chart(misc.BPA):
@@ -50,10 +52,10 @@ class Chart(misc.BPA):
 		self.glyphs   [plot_key][glyph_key] = glyph
 	
 	def add_tool (self, plot_key, glyph_key, tool):
-		if plot_key not in self.additional_tools.keys():
+		if plot_key not in self.additional_tools:
 			self.additional_tools[plot_key] = {glyph_key : tool}
 		else:
-			if glyph_key in self.additional_tools[plot_key].keys():
+			if glyph_key in self.additional_tools[plot_key]:
 				self.additional_tools[plot_key][glyph_key].append (tool)
 			else:
 				self.additional_tools[plot_key][glyph_key] = [tool]
@@ -62,14 +64,14 @@ class Chart(misc.BPA):
 		self.new_data_lock.acquire ()
 		for kp, vp in data.items():
 			for kg, vg in vp.items():
-				if kp not in self.new_data.keys():
+				if kp not in self.new_data:
 					self.new_data[kp] = {kg : {}}
 
-				if kg not in self.new_data[kp].keys():
+				if kg not in self.new_data[kp]:
 					self.new_data[kp][kg] = {}
 
 				for k, v in vg.items():
-					if k not in self.new_data[kp][kg].keys():
+					if k not in self.new_data[kp][kg]:
 						self.new_data[kp][kg][k] = [v]
 
 					else:
@@ -102,8 +104,8 @@ class Chart(misc.BPA):
 		
 					self.renderers [k] = {gk : tmp_rndr}
 		
-					if k in self.additional_tools.keys():
-						if gk in self.additional_tools[k].keys():
+					if k in self.additional_tools:
+						if gk in self.additional_tools[k]:
 							tool = self.additional_tools[k][gk]
 		
 							if type(tool) is not list:
@@ -131,8 +133,8 @@ class Chart(misc.BPA):
 			
 				for kp, vp in self.new_plot_data.items():
 					for kg, vg in vp.items():
-						if kp in self.sources.keys():
-							if kg in self.sources[kp].keys():
+						if kp in self.sources:
+							if kg in self.sources[kp]:
 								self.sources[kp][kg].stream (vg)#, rollover = 288)
 				self.cb_lock.release ()
 			
@@ -152,7 +154,9 @@ class Chart(misc.BPA):
 	
 		app = {'/analyzing': Application(FunctionHandler(modify_document))}
 	
+		logging.getLogger ('tornado.access').disabled = True
 		self.server = Server (app, port = self.port, allow_websocket_origin = self.allow_websocket_origin)
+
 		self.server.start ()
 		self.exec_t        = Thread (name = "bokeh_chart", target = self.server.io_loop.start)
 		self.exec_t.daemon = True

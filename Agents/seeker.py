@@ -46,7 +46,7 @@ class BaseSeeker (misc.BPA):
 		if (self.archive_len > 0 and data ['T'] != self.archive [-1]['T']) or (self.archive_len == 0):
 			self.store (data)
 		
-		return self.call_predict (factor, data) if factor not in self.prediction.keys() else self.prediction [factor]
+		return self.call_predict (factor, data) if factor not in self.prediction else self.prediction [factor]
 
 	def call_predict (self, factor, data):
 		if factor == 'hitgoal':

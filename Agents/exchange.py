@@ -9,8 +9,10 @@ fee = 0.0025
 pAPIv1 = exchg.PublicAPI  (exchg.API_V1_1)
 pAPIv2 = exchg.PublicAPI  (exchg.API_V2_0)
 
-mAPI = exchg.MarketAPI  (exchg.API_V1_1, cfg.config['Bittrex']['API_KEY'].encode('utf-8'), cfg.config['Bittrex']['API_SECRET'].encode('utf-8')) 
-aAPI = exchg.AccountAPI (exchg.API_V1_1, cfg.config['Bittrex']['API_KEY'].encode('utf-8'), cfg.config['Bittrex']['API_SECRET'].encode('utf-8')) 
+config = cfg.config.bittrex
+
+mAPI = exchg.MarketAPI  (exchg.API_V1_1, config.api_key.encode('utf-8'), config.api_secret.encode('utf-8')) 
+aAPI = exchg.AccountAPI (exchg.API_V1_1, config.api_key.encode('utf-8'), config.api_secret.encode('utf-8')) 
 
 def get_candle_ticks (market, interval, get_last_only = True):
 	status, data = pAPIv2.get_ticks (market, interval, get_last_only)

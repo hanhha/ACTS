@@ -68,6 +68,9 @@ class AWindow(object):
 	def win (self):
 		return self._win
 
+	def clrtoeol (self):
+		self._win.clrtoeol ()
+
 	def addstr (self, *args):
 		self._win.addstr (*args)
 		self.refresh ()
@@ -119,7 +122,7 @@ class SimpleWinMan(ConsoleScreen):
 		self.title   = title
 		self.maxX    = None 
 		self.maxY    = None 
-		self.verbose = kwargs ['verbose'] if 'verbose' in kwargs.keys() else 2
+		self.verbose = kwargs ['verbose'] if 'verbose' in kwargs else 2
 		self.windows = dict () 
 
 		ConsoleScreen.__init__ (self)
@@ -196,11 +199,22 @@ class SimpleWinMan(ConsoleScreen):
 
 			self.windows[n] = self.createWindow (h, w, y, x, title, refWin = self.windows[n] if (self.windows[n] is not None) and resize else None, bkgd = curses.color_pair (3), initial_content = text)
 
+	def println_on_window (self, window, *args, **kwargs):
+		if self.enabled:
+			window.addstr (*args)
+			window.clrtoeol ()
+		else:
+			if (('verbose' in kwargs) and (self.verbose >=  kwargs['verbose'])) or ('verbose' not in kwargs):
+				for arg in args:
+					if type(arg) is str:
+						print (arg)
+						break
+
 	def print_on_window (self, window, *args, **kwargs):
 		if self.enabled:
 			window.addstr (*args)
 		else:
-			if (('verbose' in kwargs.keys()) and (self.verbose >=  kwargs['verbose'])) or ('verbose' not in kwargs.keys()):
+			if (('verbose' in kwargs) and (self.verbose >=  kwargs['verbose'])) or ('verbose' not in kwargs):
 				for arg in args:
 					if type(arg) is str:
 						print (arg)
