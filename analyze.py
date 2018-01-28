@@ -46,12 +46,13 @@ class Analyzer (misc.BPA):
 
 		self.monitor.stop ()	
 
-		if cfg.cmd_args.save:
+		if cfg.cmd_args.archive:
 			self.predict_eva.save ('predict_{mar}.json'.format(mar = cfg.configuration['market']))
 
 analyzer = Analyzer (source = None, params = cfg.configuration, agent_params = cfg.strategy_agents) 
 
-analyzer.predict_eva.BindTo (vb.cvt.CallBack)
+if s_cfg.bokeh_en:
+	analyzer.predict_eva.BindTo (vb.cvt.CallBack)
 
 trading_ui = ui.UserInterface ("Crypto Market Analyzer System", verbose = cfg.cmd_args.verbose)
 
@@ -60,7 +61,7 @@ analyzer.monitor.setShoutFunc  (trading_ui.printCur)
 analyzer.analyzer.setShoutFunc (trading_ui.printCur)
 
 def main (stdscr):
-	if not cfg.cmd_args.no_curses:
+	if not cfg.cmd_args.simple_ui:
 		trading_ui.start ()
 
 	trading_ui.printTip ("Showing time is GMT0 to match with returned data from exchange ...")
@@ -70,16 +71,16 @@ def main (stdscr):
 	analyzer.start ()
 	analyzer.idle  ()
 
-	if not cfg.cmd_args.no_curses:
+	if not cfg.cmd_args.simple_ui:
 		trading_ui.end ()
 
 if __name__ == "__main__":
 	if s_cfg.bokeh_en:
-		print (s_cfg.config ['Bokeh']['allowed_origins'])	
-		list_origins = list(filter(lambda s: s != '', list(map (lambda x:x.strip(), [o for o in s_cfg.config['Bokeh']['allowed_origins'].split (',')]))))
+		print (s_cfg.config.bokeh.allowed_origin)	
+		list_origins = list(filter(lambda s: s != '', list(map (lambda x:x.strip(), [o for o in s_cfg.config.bokeh.allowed_origins.split (',')]))))
 
 		vb.chart.allow_websocket_origin = list_origins
-		vb.chart.port                   = int(s_cfg.config ['Bokeh']['port'])
+		vb.chart.port                   = int(s_cfg.config.bokeh.port)
 		vb.chart.start ()
 
 	main (0)
