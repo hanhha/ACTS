@@ -89,10 +89,12 @@ class Layout(FloatingWindow):
 				self._pool [k] = win
 				self._tree.append(win)
 				self._fixed_l += self.get_var_dim (win)
+				self._n_layouts += 1 if v[0] == v[1] == 0 else 0
 
 	def update (self, w, h):
 		FloatingWindow.update (self, w, h)
 		self.remaining_lay = self._n_layouts
+		self.remaining = self.get_var_dim(self) - self._fixed_l
 
 	def update_child (self, pre_child_win, child_win):
 		assert "Need to implement", 0
@@ -108,23 +110,15 @@ class HLayout(Layout):
 	def get_var_dim(self, win):
 		return win.w
 
-	def update (self, w, h):
-		Layout.update (self, w, h)
-		self.remaining = self.w - self._fixed_l
-
 	def update_child (self, pre_child_win, child_win):
 		ch = self.h
 		cy = self.y 
 
-		if pre_child_win is None:
-			cx = self.x
-			cw = child_win.w if child_win.type == 'win' else self.remaining // self.remaining_lay
-		else:
-			cx = pre_child_win.x + pre_child_win.w
-			cw = child_win.w if child_win.type == 'win' else (self.remaining - pre_child_win.w) // self.remaining_lay
+		cx = self.x if pre_child_win is None else pre_child_win.x + pre_child_win.w
+		cw = child_win.w if child_win.type == 'win' else self.remaining // self.remaining_lay
 
 		self.remaining -= cw
-		self.remaining_lay -= 1
+		self.remaining_lay -= 1 if child_win.type != 'win' else 0
 
 		child_win.update (cw, ch)
 		child_win.x, child_win.y = cx, cy
@@ -137,23 +131,15 @@ class VLayout(Layout):
 	def get_var_dim (self, win):
 		return win.h
 
-	def update (self, w, h):
-		Layout.update (self, w, h)
-		self.remaining = self.h - self._fixed_l
-
 	def update_child (self, pre_child_win, child_win):
 		cw = self.w
 		cx = self.x 
 
-		if pre_child_win is None:
-			cy = self.y
-			ch = child_win.h if child_win.type == 'win' else self.remaining // self.remaining_lay
-		else:
-			cy = pre_child_win.y + pre_child_win.h
-			ch = child_win.h if child_win.type == 'win' else (self.remaining - pre_child_win.h) // self.remaining_lay
+		cy = self.y if pre_child_win is None else pre_child_win.y + pre_child_win.h
+		ch = child_win.h if child_win.type == 'win' else self.remaining // self.remaining_lay
 
 		self.remaining -= ch
-		self.remaining_lay -= 1
+		self.remaining_lay -= 1 if child_win.type != 'win' else 0
 
 		child_win.update (cw, ch)
 		child_win.x, child_win.y = cx, cy
@@ -167,10 +153,10 @@ class WinGen(object):
 		self.winpool = dict ()
 
 		if 'HLayout' in layout_root:
-			self.layout = wingen.HLayout (self.winpool)
+			self.layout = HLayout (self.winpool)
 			self.layout.create (layout_root ['HLayout'])
 		elif 'VLayout' in layout_root:
-			self.layout = wingen.VLayout (self.winpool)
+			self.layout = VLayout (self.winpool)
 			self.layout.create (layout_root ['VLayout'])
 
 		self.win_attr = win_attr
@@ -179,7 +165,9 @@ class WinGen(object):
 		self.layout.update (self.maxX, self.maxY)
 		self.layout.distribute ()
 
-if __name__ == '__main__':
+if __name__ == '__main__':   
+	from collections import OrderedDict
+    
 	ui_sheet = {
 		'VLayout': {
 			'title'  : (0, 4),
@@ -203,3 +191,7 @@ if __name__ == '__main__':
 	}
 
 	wg = WinGen (ui_sheet, ui_win)
+	wg.maxX, wg.maxY = 100, 40
+	wg.generate (True)
+	for k, v in wg.winpool.items ():
+		print ("Win {l} : {v}".format (l = k, v = v.getWin()))
