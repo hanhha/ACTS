@@ -117,7 +117,7 @@ class HLayout(Layout):
 		cx = self.x if pre_child_win is None else pre_child_win.x + pre_child_win.w
 		cw = child_win.w if child_win.type == 'win' else self.remaining // self.remaining_lay
 
-		self.remaining -= cw
+		self.remaining -= cw if child_win.type != 'win' else 0
 		self.remaining_lay -= 1 if child_win.type != 'win' else 0
 
 		child_win.update (cw, ch)
@@ -138,35 +138,36 @@ class VLayout(Layout):
 		cy = self.y if pre_child_win is None else pre_child_win.y + pre_child_win.h
 		ch = child_win.h if child_win.type == 'win' else self.remaining // self.remaining_lay
 
-		self.remaining -= ch
+		self.remaining -= ch if child_win.type != 'win' else 0
 		self.remaining_lay -= 1 if child_win.type != 'win' else 0
 
 		child_win.update (cw, ch)
 		child_win.x, child_win.y = cx, cy
 
-class WinGen(object):
-	def __init__ (self, layout_root, win_attr, **kwargs):
-		self.maxX    = None 
-		self.maxY    = None 
-		self.windows = dict ()
-
-		self.winpool = dict ()
-
-		if 'HLayout' in layout_root:
-			self.layout = HLayout (self.winpool)
-			self.layout.create (layout_root ['HLayout'])
-		elif 'VLayout' in layout_root:
-			self.layout = VLayout (self.winpool)
-			self.layout.create (layout_root ['VLayout'])
-
-		self.win_attr = win_attr
-
-	def generate (self, resize):
-		self.layout.update (self.maxX, self.maxY)
-		self.layout.distribute ()
-
 if __name__ == '__main__':   
 	from collections import OrderedDict
+
+	class WinGen(object):
+		def __init__ (self, layout_root, win_attr, **kwargs):
+			self.maxX    = None 
+			self.maxY    = None 
+			self.windows = dict ()
+	
+			self.winpool = dict ()
+	
+			if 'HLayout' in layout_root:
+				self.layout = HLayout (self.winpool)
+				self.layout.create (layout_root ['HLayout'])
+			elif 'VLayout' in layout_root:
+				self.layout = VLayout (self.winpool)
+				self.layout.create (layout_root ['VLayout'])
+	
+			self.win_attr = win_attr
+	
+		def generate (self, resize):
+			self.layout.update (self.maxX, self.maxY)
+			self.layout.distribute ()
+
     
 	ui_sheet = {
 		'VLayout': {
