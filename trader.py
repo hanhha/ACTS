@@ -96,7 +96,8 @@ trader = Trader (source = None, params = cfg.configuration, agent_params = cfg.s
 if s_cfg.bokeh_en:
 	trader.predict_eva.BindTo (vb.cvt.CallBack)
 
-trading_ui = ui.UserInterface ("Auto Crypto Trading System", verbose = cfg.cmd_args.verbose)
+trading_ui = ui
+trading_ui.UI.verbose = cfg.cmd_args.verbose
 
 trader.setShoutFunc            (trading_ui.printCur)
 trader.profit_eva.setShoutFunc (trading_ui.printEva)
@@ -106,7 +107,7 @@ trader.reporter                = trading_ui.printSum
 
 def main (stdscr):
 	if not cfg.cmd_args.simple_ui:
-		trading_ui.start ()
+		trading_ui.UI.start ()
 
 		trading_ui.printTip ("Showing time is GMT0 to match with returned data from exchange ...")
 		trading_ui.printTip ("Charts shows at <hostname>:8888/analyzing ...")
@@ -118,8 +119,8 @@ def main (stdscr):
 
 	if not cfg.cmd_args.simple_ui:
 		trading_ui.printCur ("Press any key to exit this UI and see the report ...")
-		c = trading_ui.getch (True)
-		trading_ui.end ()
+		c = trading_ui.UI.getch (True)
+		trading_ui.UI.end ()
 
 if __name__ == "__main__":
 	print ('Auto Crypto Trading System')

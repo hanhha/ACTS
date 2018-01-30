@@ -3,115 +3,94 @@
 from time import sleep
 import curses
 from curses import wrapper
+from collections import OrderedDict
 
 try:
 	from . import console_utils as cls
 except (SystemError, ImportError):
 	import console_utils as cls
 
-class UserInterface(cls.SimpleWinMan):
-	def __init__ (self, title, **kwargs):
-		self.tltWin = None
-		self.tipWin = None
-		self.evaWin = None
-		self.curWin = None
-		self.sumWin = None
+ui_sheet = {
+	'VLayout': {
+		'title'  : (0, 4),
+		'tips'   : (0, 6),
+		'HLayout': {
+			'VLayout'   : {
+				'activities': (0, 0),
+				'summary'   : (0, 7),
+			},
+			'current': (0, 0),
+		}
+	}
+}
+ui_sheet = OrderedDict (ui_sheet)
 
-		cls.SimpleWinMan.__init__ (self, title, **kwargs)
+ui_win = {
+	'tips': {'title':'Tips'},
+	'title': {'text': 'Auto Crypto Trading System'},
+	'activities': {'title': 'Trading Actitivites'},
+	'summary': {'title': 'Summary'},
+	'current': {'title': 'Latest data'},
+}
 
-	def generate (self, resize = False):
-		self.showTitle      (resize)
-		self.showTip        (resize)
-		self.showEvaluation (resize)
-		self.showSummary    (resize)
-		self.showCurrent    (resize)
+UI = cls.SimpleWinMan (ui_sheet, ui_win)
 
-	def showTitle (self, resize = False):
-		if self.tltWin == None or resize:
-			h = 2 + 2
-			self.tltWin = self.createWindow (h, self.maxX, 0, 0, refWin = self.tltWin if (self.tltWin is not None) and resize else None, bkgd = curses.color_pair (3), initial_content = self.title)
+def printEva (text, **kwargs):
+	if 'good' in kwargs:
+		cp = 1 if kwargs['good'] else 2
+		UI.print_on_window ('activities', text + '\n',  curses.color_pair(cp), **kwargs) 
+	else:
+		UI.print_on_window ('activities', text + '\n', **kwargs)
 
-	def showTip (self, resize = False):
-		if self.tipWin == None or resize:
-			h = 4 + 2
-			self.tipWin = self.createWindow (h, self.maxX, 4, 0, "Tips", refWin = self.tipWin if (self.tipWin is not None) and resize else None, bkgd = curses.color_pair(3)) 
+def printTip (text, **kwargs):
+	UI.print_on_window ('tips', text + '\n', **kwargs)
 
-	def showEvaluation (self, resize = False):
-		if self.evaWin == None or resize:
-			h = self.maxY - 10 - 7 
-			w = self.maxX // 2
-			self.evaWin = self.createWindow (h, w, 10, 0, "Trading activities", refWin = self.evaWin if (self.evaWin is not None) and resize else None, bkgd = curses.color_pair(3))
+def printCur (text, **kwargs):
+	if 'good' in kwargs:
+		cp = 1 if kwargs['good'] else 2
+		UI.print_on_window ('current', text + '\n',  curses.color_pair(cp), **kwargs) 
+	else:
+		UI.print_on_window ('current', text + '\n', **kwargs)
 
-	def showSummary (self, resize = False):
-		if self.sumWin == None or resize:
-			h = 7
-			w = self.maxX // 2
-			self.sumWin = self.createWindow (h, w, self.maxY - 7, 0, "Summaries", refWin = self.sumWin if (self.sumWin is not None) and resize else None, bkgd = curses.color_pair(3))
+def printSum (key, val):
+	if key == 'runtime':
+		y = 0
+		text = "Ret. candlesticks    : {n}".format (n = val)
+	elif key == 'cycle':
+		y = 1
+		text = "Completed trade      : {n}".format (n = val)
+	elif key == 'init':
+		y = 2
+		text = "Initial cap          : {n}".format (n = val)
+	elif key == 'last':
+		y = 3
+		text = "Last trade gross     : {n}".format (n = val)
+	elif key == 'on_going':
+		y = 4
+		text = "Cap on current trade : {n}".format (n = val)
 
-	def showCurrent (self, resize = False):
-		if self.curWin == None or resize:
-			h = self.maxY - 10
-			w = self.maxX - (self.maxX // 2)
-			self.curWin = self.createWindow (h, w, 10, self.maxX // 2, "Latest info", refWin = self.curWin if (self.curWin is not None) and resize else None, bkgd = curses.color_pair(3))
-
-	def printEva (self, text, **kwargs):
-		if 'good' in kwargs:
-			cp = 1 if kwargs['good'] else 2
-			self.print_on_window (self.evaWin, text + '\n', curses.color_pair(cp) if self.enabled else None, **kwargs)
-		else:
-			self.print_on_window (self.evaWin, text + '\n', **kwargs)
-
-	def printTip (self, text, **kwargs):
-		self.print_on_window (self.tipWin, text + '\n', **kwargs)
-
-	def printCur (self, text, **kwargs):
-		if 'good' in kwargs:
-			cp = 1 if kwargs['good'] else 2
-			self.print_on_window (self.curWin, text + '\n', curses.color_pair(cp) if self.enabled else None, **kwargs)
-		else:
-			self.print_on_window (self.curWin, text + '\n', **kwargs)
-
-	def printSum (self, key, val):
-		if key == 'runtime':
-			y = 0
-			text = "Ret. candlesticks    : {n}".format (n = val)
-		elif key == 'cycle':
-			y = 1
-			text = "Completed trade      : {n}".format (n = val)
-		elif key == 'init':
-			y = 2
-			text = "Initial cap          : {n}".format (n = val)
-		elif key == 'last':
-			y = 3
-			text = "Last trade gross     : {n}".format (n = val)
-		elif key == 'on_going':
-			y = 4
-			text = "Cap on current trade : {n}".format (n = val)
-
-		self.println_on_window (self.sumWin, y, 0, text)	
+	UI.println_on_window ('summary', y, 0, text)
+	
 
 def main (stdscr):
-	ui = UserInterface ("Test")
-
-	print ("Hello")
-
-	ui.start ()
+	UI.start ()
 
 	for i in range(0,10):
-		ui.printEva ("111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",good=True)
+		sleep (10)
+		printEva ("111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",good=True)
 		sleep (0.5)
-		ui.printEva ("222222222222222222222222222222222222222222222222222222222222222222222222222222222222222",good=False)
+		printEva ("222222222222222222222222222222222222222222222222222222222222222222222222222222222222222",good=False)
 		sleep (0.5)
-		ui.printEva ("111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",good=True)
+		printEva ("111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",good=True)
 		sleep (0.5)
-		ui.printEva ("222222222222222222222222222222222222222222222222222222222222222222222222222222222222222",good=False)
+		printEva ("222222222222222222222222222222222222222222222222222222222222222222222222222222222222222",good=False)
 		sleep (0.5)
-		ui.printEva ("111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
+		printEva ("111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
 		sleep (0.5)
-		ui.printEva ("222222222222222222222222222222222222222222222222222222222222222222222222222222222222222")
+		printEva ("222222222222222222222222222222222222222222222222222222222222222222222222222222222222222")
 		sleep (0.5)
 
-	ui.end ()
+	UI.end ()
 
 if __name__ == "__main__":
 	wrapper (main)
