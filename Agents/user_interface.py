@@ -10,20 +10,19 @@ try:
 except (SystemError, ImportError):
 	import console_utils as cls
 
-ui_sheet = {
-	'VLayout': {
+ui_sheet = OrderedDict ({
+	'VLayout': OrderedDict({
 		'title'  : (0, 4),
 		'tips'   : (0, 6),
-		'HLayout': {
-			'VLayout'   : {
+		'HLayout': OrderedDict({
+			'VLayout'   : OrderedDict({
 				'activities': (0, 0),
 				'summary'   : (0, 7),
-			},
+			}),
 			'current': (0, 0),
-		}
-	}
-}
-ui_sheet = OrderedDict (ui_sheet)
+		})
+	})
+})
 
 ui_win = {
 	'tips': {'title':'Tips'},
