@@ -25,12 +25,16 @@ class Seeker(BaseSeeker):
 	def predict_trend (self, data):
 		<your code to return the prediction of trend which is among of ['peak', 'canyon', 'risng', 'falling', 'stable']>
 ~~~
-- For the first time, it would creates 2 config files. You would then need to modify those files to match your desires.
+- Run
+~~
+trader.py -h
+~~
+For the first time, it would creates 2 config files. You would then need to modify those files to match your desires.
 	+ user_config.ini : your desired market, goal, lost threshold, interval, exchange fee and some debug/simulation configuration.
 	+ acts_config.ini : API key and secret key for exchange, Bokeh configuration (in case that you want to show charts)
 
 ### Requirements ###
-- Python 3+.
+- Python 3.6+ (mandatory to show UI correctly)
 - My [Bittrex API Python wrapper](https://github.com/hanhha/bittrex).
 - You may want to use TA-Lib for technical analysis. I suggest [this wrapper](https://mrjbq7.github.io/ta-lib/).
 - Bokeh to show the charts.
