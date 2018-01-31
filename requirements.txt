@@ -1,0 +1,2 @@
+bokeh>=0.12.13
+localconfig>=1.0.2
