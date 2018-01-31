@@ -25,11 +25,16 @@ class Seeker(BaseSeeker):
 	def predict_trend (self, data):
 		<your code to return the prediction of trend which is among of ['peak', 'canyon', 'risng', 'falling', 'stable']>
 ~~~
-- Run:
+- To simulate trading, trial trade or real trade, run this utility:
 ~~~
-trader.py -h
+trader.py
 ~~~
-For the first time, it would create 2 config files. You would then need to modify those files to match your desires.
+- To analyze your strategy after coding the file seeker_custom.py, run this ultility:
+~~~
+analyze.py
+~~~
+
+For the first time (either trader.py or analyze.py), it would create 2 config files. You would then need to modify those files to match your desires.
 
 + user_config.ini : your desired market, goal, lost threshold, interval, exchange fee and some debug/simulation configuration.
 + acts_config.ini : API key and secret key for exchange, Bokeh configuration (in case that you want to show charts)
