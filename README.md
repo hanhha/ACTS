@@ -36,5 +36,6 @@ For the first time, it would creates 2 config files. You would then need to modi
 ### Requirements ###
 - Python 3.6+ (mandatory to show UI correctly)
 - My [Bittrex API Python wrapper](https://github.com/hanhha/bittrex).
+- My [Curses UI generator](https://github.com/hanhha/console_ui)
 - You may want to use TA-Lib for technical analysis. I suggest [this wrapper](https://mrjbq7.github.io/ta-lib/).
 - Bokeh to show the charts.
