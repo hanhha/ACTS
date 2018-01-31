@@ -3,20 +3,18 @@
 from time import time, sleep
 
 from Agents.evaluator     import (ProfitEvaluator, PredictEvaluator) 
-from Agents               import misc_utils     as misc
 from Agents.monitor       import Monitor        as Mon
 from Agents.strategy      import Strategy
 from Agents.performer     import Performer      as Perf
 from Agents.risk_mgnt     import RiskMgnt       as Risk
+from Agents               import misc_utils     as misc
 from Agents               import user_interface as ui
-from Agents.console_utils import *
-
 from Agents               import acts_config    as s_cfg
+
 import trader_cfg                               as cfg
 
 if s_cfg.bokeh_en:
 	import trader_visual_to_bokeh               as vb
-
 
 class Trader (misc.BPA):
 	def __init__ (self, source, params, agent_params):
