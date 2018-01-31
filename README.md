@@ -30,8 +30,9 @@ class Seeker(BaseSeeker):
 trader.py -h
 ~~~
 For the first time, it would creates 2 config files. You would then need to modify those files to match your desires.
-	+ user_config.ini : your desired market, goal, lost threshold, interval, exchange fee and some debug/simulation configuration.
-	+ acts_config.ini : API key and secret key for exchange, Bokeh configuration (in case that you want to show charts)
+
++ user_config.ini : your desired market, goal, lost threshold, interval, exchange fee and some debug/simulation configuration.
++ acts_config.ini : API key and secret key for exchange, Bokeh configuration (in case that you want to show charts)
 
 ### Requirements ###
 - Python 3.6+ (mandatory to show UI correctly)
