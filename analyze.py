@@ -4,9 +4,8 @@ from time import time, sleep
 
 from Agents.evaluator     import PredictEvaluator 
 from Agents.tanalyzer     import TAnalyzer
-from Agents.console_utils import *
-from Agents		          import misc_utils     as misc
 from Agents.monitor       import Monitor        as Mon
+from Agents		            import misc_utils     as misc
 from Agents               import user_interface as ui
 
 from Agents               import acts_config    as s_cfg
@@ -14,7 +13,6 @@ import trader_cfg                               as cfg
 
 if s_cfg.bokeh_en:
 	import trader_visual_to_bokeh             as vb
-
 
 class Analyzer (misc.BPA):
 	def __init__ (self, source, params, agent_params):
@@ -54,7 +52,9 @@ analyzer = Analyzer (source = None, params = cfg.configuration, agent_params = c
 if s_cfg.bokeh_en:
 	analyzer.predict_eva.BindTo (vb.cvt.CallBack)
 
-trading_ui = ui.UserInterface ("Crypto Market Analyzer System", verbose = cfg.cmd_args.verbose)
+trading_ui = ui
+trading_ui.UI.title = "Crypto Market Analyzer System"
+trading_ui.UI.verbose = cfg.cmd_args.verbose
 
 analyzer.setShoutFunc          (trading_ui.printCur)
 analyzer.monitor.setShoutFunc  (trading_ui.printCur)
@@ -62,7 +62,7 @@ analyzer.analyzer.setShoutFunc (trading_ui.printCur)
 
 def main (stdscr):
 	if not cfg.cmd_args.simple_ui:
-		trading_ui.start ()
+		trading_ui.UI.start ()
 
 	trading_ui.printTip ("Showing time is GMT0 to match with returned data from exchange ...")
 	trading_ui.printTip ("Charts shows at <hostname>:8888/analyzing ...")
@@ -72,7 +72,8 @@ def main (stdscr):
 	analyzer.idle  ()
 
 	if not cfg.cmd_args.simple_ui:
-		trading_ui.end ()
+		c = trading_ui.UI.getch (True)
+		trading_ui.UI.end ()
 
 if __name__ == "__main__":
 	if s_cfg.bokeh_en:
